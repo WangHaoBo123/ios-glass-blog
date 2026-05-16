@@ -1,9 +1,20 @@
 (function () {
+  function sameSiteReferrer() {
+    if (!document.referrer) return false;
+
+    try {
+      return new URL(document.referrer).origin === window.location.origin;
+    } catch {
+      return false;
+    }
+  }
+
   const isHomePage = /(?:^|\/)index\.html$/i.test(window.location.pathname) || /\/$/.test(window.location.pathname);
   const isArticleList = !window.location.hash || window.location.hash === "#articles";
   const navigation = performance.getEntriesByType?.("navigation")?.[0];
   const navigationType = navigation?.type || "";
-  const shouldPlayForNavigation = navigationType === "reload";
+  const cameFromSameSite = sameSiteReferrer();
+  const shouldPlayForNavigation = navigationType === "reload" || !cameFromSameSite;
 
   if (
     !isHomePage ||
