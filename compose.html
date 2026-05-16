@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="灰玻璃日记的 WordPress 风格本地 Markdown 写作台。" />
+    <meta name="theme-color" content="#202124" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>写作 - 灰玻璃日记</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#content">跳到正文</a>
+
+    <div class="ambient" aria-hidden="true" data-ambient>
+      <span class="ambient-bar ambient-bar-a" data-ambient-bar="a"></span>
+      <span class="ambient-bar ambient-bar-b" data-ambient-bar="b"></span>
+    </div>
+
+    <header class="site-header">
+      <nav class="nav-shell" aria-label="主导航">
+        <a class="brand" href="./index.html" aria-label="灰玻璃日记首页">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>灰玻璃日记</span>
+        </a>
+
+        <div class="nav-links" aria-label="页面栏目">
+          <a href="./index.html#articles">文章</a>
+          <a href="./index.html#archive">归档</a>
+          <a href="./index.html#tags">标签</a>
+          <a href="./compose.html" aria-current="page">写作</a>
+          <a href="./manage.html">管理</a>
+          <a href="./about.html">关于</a>
+          <button type="button" data-auth-logout>退出</button>
+        </div>
+      </nav>
+    </header>
+
+    <main id="content" class="page-shell editor-shell" data-authenticated-only hidden>
+      <section class="editor-topbar compose-panel" aria-label="编辑器工具栏">
+        <div class="editor-state">
+          <p class="kicker">Compose</p>
+          <strong data-save-state>草稿已保存</strong>
+        </div>
+
+        <div class="editor-tabs" role="tablist" aria-label="写作视图">
+          <button class="segment is-active" type="button" data-editor-view="write" role="tab" aria-selected="true">
+            编辑
+          </button>
+          <button class="segment" type="button" data-editor-view="preview" role="tab" aria-selected="false">
+            预览
+          </button>
+          <button class="segment" type="button" data-editor-view="export" role="tab" aria-selected="false">
+            导出
+          </button>
+        </div>
+
+        <div class="button-row editor-actions">
+          <button class="secondary-button" type="button" data-new-draft>新草稿</button>
+          <button class="action-button" type="button" data-save-draft>保存草稿</button>
+          <button class="publish-button" type="button" data-publish-post>发布文章</button>
+          <button class="secondary-button" type="button" data-clear-draft>清空</button>
+          <button class="secondary-button" type="button" data-copy-entry>复制条目</button>
+          <button class="action-button" type="button" data-download>下载 Markdown</button>
+        </div>
+      </section>
+
+      <form class="editor-layout" data-compose-form>
+        <div class="block-toolbar" role="toolbar" aria-label="Markdown 格式工具" data-view-panel="write">
+          <button type="button" data-md="h1" data-tooltip="一级标题" data-shortcut="Ctrl+Alt+1" aria-label="一级标题">H1</button>
+          <button type="button" data-md="h2" data-tooltip="二级标题" data-shortcut="Ctrl+Alt+2" aria-label="二级标题">H2</button>
+          <button type="button" data-md="h3" data-tooltip="三级标题" data-shortcut="Ctrl+Alt+3" aria-label="三级标题">H3</button>
+          <button type="button" data-md="h4" data-tooltip="四级标题" data-shortcut="Ctrl+Alt+4" aria-label="四级标题">H4</button>
+          <button type="button" data-md="bold" data-tooltip="加粗选中文字" data-shortcut="Ctrl+B" aria-label="加粗选中文字">B</button>
+          <button type="button" data-md="italic" data-tooltip="斜体选中文字" data-shortcut="Ctrl+I" aria-label="斜体选中文字">I</button>
+          <span class="highlight-tool" aria-label="荧光笔标记">
+            <button class="highlight-button" type="button" data-md="highlight" data-tooltip="荧光笔标记" data-shortcut="Ctrl+Shift+H" aria-label="荧光笔标记选中文字">H</button>
+            <input data-highlight-color type="color" value="#ffd966" title="选择荧光笔颜色" aria-label="选择荧光笔颜色" />
+          </span>
+          <button type="button" data-md="quote" data-tooltip="引用段落" data-shortcut="Ctrl+Alt+Q" aria-label="引用段落">“”</button>
+          <button type="button" data-md="list" data-tooltip="项目列表" data-shortcut="Ctrl+Alt+L" aria-label="项目列表">•</button>
+          <button type="button" data-md="codeblock" data-tooltip="代码块" data-shortcut="Ctrl+Alt+C" aria-label="代码块">{ }</button>
+          <button type="button" data-md="link" data-tooltip="插入链接" data-shortcut="Ctrl+K" aria-label="插入链接">↗</button>
+          <button type="button" data-connect-assets data-tooltip="连接图片保存目录" data-shortcut="选择项目根目录" aria-label="连接图片保存目录">图片目录</button>
+          <button type="button" data-import-image data-tooltip="导入图片" data-shortcut="也可以拖入图片" aria-label="导入图片">图片</button>
+        </div>
+
+        <section class="compose-panel editor-canvas" data-view-panel="write" data-editor-canvas>
+          <input
+            class="editor-title-input"
+            data-title
+            type="text"
+            autocomplete="off"
+            value="新的文章标题"
+            aria-label="文章标题"
+          />
+
+          <div class="permalink-row">
+            <span>固定链接</span>
+            <code>posts/</code>
+            <input data-slug type="text" autocomplete="off" value="new-post" aria-label="文章 slug" />
+            <code>.md</code>
+          </div>
+
+          <input class="image-import-input" data-image-input type="file" accept="image/*" multiple />
+          <div class="media-flow" data-media-flow aria-label="文章图片块排序"></div>
+
+          <textarea
+            class="block-editor"
+            data-content
+            rows="24"
+            aria-label="文章正文"
+          ># 新的文章标题
+
+从这里开始写正文。
+
+## 小标题
+
+- 第一条想法
+- 第二条想法
+
+写完以后可以在右侧检查预览。</textarea>
+        </section>
+
+        <aside class="compose-panel document-sidebar" data-view-panel="write">
+          <div class="sidebar-section">
+            <div class="sidebar-title">
+              <span>文档</span>
+              <strong data-word-count>0 字</strong>
+            </div>
+            <div class="publish-checklist" aria-label="发布检查">
+              <span data-check-title>标题</span>
+              <span data-check-summary>摘要</span>
+              <span data-check-tags>标签</span>
+            </div>
+          </div>
+
+          <div class="sidebar-section publish-panel">
+            <div class="sidebar-title">
+              <span>发布</span>
+              <strong data-publish-state>未发布</strong>
+            </div>
+            <p class="publish-note">发布后会先出现在本机首页预览。公开到 GitHub 时，仍然需要导出 Markdown 和文章条目。</p>
+            <a class="secondary-button" href="./index.html#articles">查看首页</a>
+          </div>
+
+          <div class="sidebar-section">
+            <div class="sidebar-title">
+              <span>草稿箱</span>
+              <strong data-draft-count>0 篇</strong>
+            </div>
+            <div class="draft-list" data-draft-list></div>
+          </div>
+
+          <div class="sidebar-section">
+            <label class="field">
+              <span>日期</span>
+              <input data-date type="date" />
+            </label>
+
+            <label class="field">
+              <span>分类</span>
+              <input data-category type="text" list="category-options" autocomplete="off" value="技术" />
+              <datalist id="category-options">
+                <option value="技术"></option>
+                <option value="生活"></option>
+                <option value="短札"></option>
+                <option value="读书"></option>
+                <option value="项目"></option>
+              </datalist>
+            </label>
+
+            <label class="field">
+              <span>标签</span>
+              <input data-tags type="text" autocomplete="off" value="Markdown, 博客" />
+            </label>
+          </div>
+
+          <div class="sidebar-section">
+            <label class="field">
+              <span>摘要</span>
+              <textarea data-summary rows="5">这里写一句文章摘要，会显示在首页卡片里。</textarea>
+            </label>
+          </div>
+
+          <div class="sidebar-section stats-grid">
+            <div>
+              <span>阅读时间</span>
+              <strong data-read-time>1 分钟</strong>
+            </div>
+            <div>
+              <span>文件名</span>
+              <strong data-file-name>new-post.md</strong>
+            </div>
+          </div>
+        </aside>
+      </form>
+
+      <section class="compose-panel preview-stage" data-view-panel="preview" hidden>
+        <div class="post-meta" data-preview-meta></div>
+        <h2 data-preview-title></h2>
+        <p class="reader-summary" data-preview-summary></p>
+        <div class="tag-list" data-preview-tags></div>
+        <div class="article-body" data-preview-body></div>
+      </section>
+
+      <section class="export-stage" data-view-panel="export" hidden>
+        <section class="compose-panel backup-panel" aria-labelledby="compose-backup-title">
+          <div>
+            <p class="kicker">Backup</p>
+            <h2 id="compose-backup-title">本机内容备份</h2>
+            <p>导出当前浏览器里的文章、草稿和隐藏记录。导入备份会覆盖相同 slug 的本机文章。</p>
+          </div>
+          <div class="button-row">
+            <button class="secondary-button" type="button" data-export-backup>导出备份</button>
+            <button class="secondary-button" type="button" data-import-backup>导入备份</button>
+          </div>
+          <input class="image-import-input" data-backup-input type="file" accept="application/json,.json" />
+          <p class="status-message" data-backup-status aria-live="polite"></p>
+        </section>
+
+        <label class="compose-panel field">
+          <span>Markdown 文件内容</span>
+          <textarea class="output-area" data-markdown-output readonly rows="14"></textarea>
+        </label>
+
+        <label class="compose-panel field">
+          <span>粘贴到 posts/index.json 的文章条目</span>
+          <textarea class="output-area" data-entry-output readonly rows="14"></textarea>
+        </label>
+      </section>
+
+      <p class="status-message" data-status aria-live="polite"></p>
+    </main>
+
+    <footer class="site-footer">
+      <span>© 2026 灰玻璃日记</span>
+      <a href="./index.html#articles">文章</a>
+      <a href="./index.html#archive">归档</a>
+      <a href="./index.html#tags">标签</a>
+      <a href="./about.html">关于</a>
+      <a href="./manage.html">管理</a>
+      <button type="button" data-auth-logout>退出</button>
+      <a href="https://github.com/" target="_blank" rel="noreferrer">GitHub</a>
+    </footer>
+
+    <script src="./auth.js"></script>
+    <script src="./page-transition.js"></script>
+    <script src="./cursor-trail.js"></script>
+    <script src="./media-editor.js"></script>
+    <script src="./backup.js"></script>
+    <script src="./compose.js"></script>
+  </body>
+</html>

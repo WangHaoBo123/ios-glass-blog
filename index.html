@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="一个深色磨砂玻璃风格的个人静态博客，可写 Markdown 文章并部署到 GitHub Pages。"
+    />
+    <meta name="theme-color" content="#202124" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="./index.html" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="灰玻璃日记" />
+    <meta property="og:title" content="灰玻璃日记" />
+    <meta property="og:description" content="一个深色磨砂玻璃风格的个人静态博客，可写 Markdown 文章并部署到 GitHub Pages。" />
+    <meta property="og:url" content="./index.html" />
+    <title>灰玻璃日记</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#content">跳到正文</a>
+
+    <div class="ambient" aria-hidden="true" data-ambient>
+      <span class="ambient-bar ambient-bar-a" data-ambient-bar="a"></span>
+      <span class="ambient-bar ambient-bar-b" data-ambient-bar="b"></span>
+    </div>
+
+    <header class="site-header">
+      <nav class="nav-shell" aria-label="主导航">
+        <a class="brand" href="./index.html" aria-label="灰玻璃日记首页">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>灰玻璃日记</span>
+        </a>
+
+        <div class="nav-links" aria-label="页面栏目">
+          <a href="./index.html#articles">文章</a>
+          <a href="./index.html#archive">归档</a>
+          <a href="./index.html#tags">标签</a>
+          <a href="./about.html">关于</a>
+          <a href="./login.html" data-guest-only>作者入口</a>
+          <a href="./compose.html" data-authenticated-only hidden>写作</a>
+          <a href="./manage.html" data-authenticated-only hidden>管理</a>
+          <button type="button" data-auth-logout data-authenticated-only hidden>退出</button>
+        </div>
+      </nav>
+    </header>
+
+    <aside class="profile-dock" aria-label="个人信息" data-list-view hidden>
+      <img class="profile-avatar profile-avatar-img" src="./assets/avatar.jpg" alt="你的名字头像" />
+
+      <div class="profile-copy">
+        <strong>StaryTra 32</strong>
+        <span>技术 / 生活 / 记录</span>
+      </div>
+      <p>把最近在想的事、做过的项目和一点清醒感慢慢写下来。</p>
+      <div class="profile-meta">
+        <span>2026</span>
+        <span>GitHub Pages</span>
+      </div>
+    </aside>
+
+    <main id="content" class="page-shell">
+      <section class="intro-grid" aria-labelledby="site-title" data-list-view hidden>
+        <div class="intro-copy">
+          <p class="kicker">Personal weblog</p>
+          <h1 id="site-title" class="script-hero-title">Live softly, think clearly, write slowly.</h1>
+          <p class="intro-text">
+            在一层灰色玻璃之后，存放技术、生活和偶尔清醒的片刻；文字轻一点，
+            结构稳一点，慢慢写，也慢慢留下。
+          </p>
+        </div>
+
+        <aside class="status-panel" aria-label="站点状态">
+          <div class="status-row">
+            <span>当前状态</span>
+            <strong>持续记录中</strong>
+          </div>
+          <div class="status-row">
+            <span>文章数量</span>
+            <strong data-total-posts>0</strong>
+          </div>
+          <div class="status-row">
+            <span>最近更新</span>
+            <strong data-latest-date>加载中</strong>
+          </div>
+        </aside>
+      </section>
+
+      <section class="toolbar" aria-label="文章筛选" data-list-view>
+        <div class="segmented" role="tablist" aria-label="文章分类" data-filter-list></div>
+
+        <label class="search-field">
+          <span class="search-icon" aria-hidden="true"></span>
+          <span class="sr-only">搜索文章</span>
+          <input type="search" data-search placeholder="搜索标题、标签或正文" autocomplete="off" />
+        </label>
+      </section>
+
+      <p class="loading-state" data-loading>正在整理文章。</p>
+
+      <section class="content-grid" id="articles" aria-label="博客内容" data-list-view hidden>
+        <article class="featured-post" data-featured-post></article>
+        <div class="post-list" data-post-list></div>
+      </section>
+
+      <section class="archive-view" id="archive" aria-labelledby="archive-title" data-archive-view hidden>
+        <div class="section-heading">
+          <p class="kicker">Archive</p>
+          <h2 id="archive-title">按时间翻看所有文章</h2>
+        </div>
+        <div class="archive-panel" data-archive-list></div>
+      </section>
+
+      <section class="tags-view" id="tags" aria-labelledby="tags-title" data-tags-view hidden>
+        <div class="section-heading">
+          <p class="kicker">Tags</p>
+          <h2 id="tags-title">按标签进入一组文章</h2>
+        </div>
+        <div class="tag-cloud-panel" data-tag-cloud></div>
+        <div class="tag-result-panel" data-tag-results hidden></div>
+      </section>
+
+      <article class="article-reader" data-reader hidden>
+        <div class="reader-card">
+          <div class="reader-actions">
+            <a class="back-link" href="#articles" data-back-to-list>返回文章</a>
+          </div>
+          <div class="post-meta" data-reader-meta></div>
+          <h1 data-reader-title></h1>
+          <p class="reader-summary" data-reader-summary></p>
+          <div class="tag-list" data-reader-tags></div>
+          <div class="article-body" data-reader-body></div>
+          <nav class="post-neighbors" data-post-neighbors aria-label="相邻文章和相关推荐"></nav>
+        </div>
+        <aside class="reader-toc" data-reader-toc aria-label="文章目录" hidden></aside>
+      </article>
+
+      <p class="empty-state" data-empty hidden>没有找到匹配的文章。</p>
+    </main>
+
+    <footer class="site-footer">
+      <span>© 2026 灰玻璃日记</span>
+      <a href="./index.html#archive">归档</a>
+      <a href="./index.html#tags">标签</a>
+      <a href="./login.html" data-guest-only>作者入口</a>
+      <a href="./compose.html" data-authenticated-only hidden>写作</a>
+      <a href="./manage.html" data-authenticated-only hidden>管理</a>
+      <button type="button" data-auth-logout data-authenticated-only hidden>退出</button>
+      <a href="https://github.com/" target="_blank" rel="noreferrer">GitHub</a>
+    </footer>
+
+    <script src="./auth.js"></script>
+    <script src="./opening.js"></script>
+    <script src="./page-transition.js"></script>
+    <script src="./cursor-trail.js"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>

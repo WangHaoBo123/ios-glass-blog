@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /compose.html
+Disallow: /manage.html
+Disallow: /login.html
+
+Sitemap: https://wanghaobo123.github.io/ios-glass-blog/sitemap.xml

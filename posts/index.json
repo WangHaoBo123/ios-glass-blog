@@ -1,0 +1,41 @@
+{
+  "posts": [
+    {
+      "slug": "static-blog-system",
+      "title": "如何把一个静态博客长期维护下去",
+      "date": "2026-05-16",
+      "category": "技术",
+      "summary": "从目录结构、文章命名、图片管理到 GitHub Pages 发布流程，整理一套不容易半途而废的写作系统。",
+      "tags": ["GitHub Pages", "Markdown", "静态博客"],
+      "featured": true,
+      "file": "./posts/static-blog-system.md"
+    },
+    {
+      "slug": "quiet-workflow",
+      "title": "最近喜欢的安静工作流",
+      "date": "2026-05-12",
+      "category": "生活",
+      "summary": "少开标签页，少切窗口，把一天拆成几个有边界的小段。",
+      "tags": ["生活", "效率"],
+      "file": "./posts/quiet-workflow.md"
+    },
+    {
+      "slug": "ui-cleanup",
+      "title": "给个人项目做一次 UI 收敛",
+      "date": "2026-05-03",
+      "category": "技术",
+      "summary": "删除多余的色彩和组件，让页面重新回到内容本身。",
+      "tags": ["前端", "设计", "UI"],
+      "file": "./posts/ui-cleanup.md"
+    },
+    {
+      "slug": "dont-optimize-too-early",
+      "title": "短札：别急着优化",
+      "date": "2026-04-28",
+      "category": "短札",
+      "summary": "很多时候真正该先做的，是把问题说清楚。",
+      "tags": ["短札", "思考"],
+      "file": "./posts/dont-optimize-too-early.md"
+    }
+  ]
+}

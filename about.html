@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="关于灰玻璃日记和作者的独立介绍页。" />
+    <meta name="theme-color" content="#202124" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="./about.html" />
+    <meta property="og:type" content="profile" />
+    <meta property="og:site_name" content="灰玻璃日记" />
+    <meta property="og:title" content="关于 - 灰玻璃日记" />
+    <meta property="og:description" content="关于灰玻璃日记和作者的独立介绍页。" />
+    <title>关于 - 灰玻璃日记</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#content">跳到正文</a>
+
+    <div class="ambient" aria-hidden="true" data-ambient>
+      <span class="ambient-bar ambient-bar-a" data-ambient-bar="a"></span>
+      <span class="ambient-bar ambient-bar-b" data-ambient-bar="b"></span>
+    </div>
+
+    <header class="site-header">
+      <nav class="nav-shell" aria-label="主导航">
+        <a class="brand" href="./index.html" aria-label="灰玻璃日记首页">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>灰玻璃日记</span>
+        </a>
+
+        <div class="nav-links" aria-label="页面栏目">
+          <a href="./index.html#articles">文章</a>
+          <a href="./index.html#archive">归档</a>
+          <a href="./index.html#tags">标签</a>
+          <a href="./about.html" aria-current="page">关于</a>
+          <a href="./login.html" data-guest-only>作者入口</a>
+          <a href="./compose.html" data-authenticated-only hidden>写作</a>
+          <a href="./manage.html" data-authenticated-only hidden>管理</a>
+          <button type="button" data-auth-logout data-authenticated-only hidden>退出</button>
+        </div>
+      </nav>
+    </header>
+
+    <main id="content" class="page-shell about-page-shell">
+      <section class="about-section about-page" aria-label="关于作者和博客">
+        <div class="about-identity">
+          <p class="kicker">About</p>
+          <h1>灰玻璃日记</h1>
+          <p>
+            一个安静的个人写作空间。这里记录技术、生活、项目和一些不急着下结论的想法。
+          </p>
+        </div>
+
+        <div class="about-portrait" aria-hidden="true">
+          <span>G</span>
+        </div>
+
+        <div class="about-details">
+          <div class="about-line">
+            <span>写作方向</span>
+            <strong>前端 / 个人项目 / 日常观察</strong>
+          </div>
+          <div class="about-line">
+            <span>更新节奏</span>
+            <strong>慢慢写，但一直写</strong>
+          </div>
+          <div class="about-line">
+            <span>站点气质</span>
+            <strong>深色、克制、磨砂玻璃</strong>
+          </div>
+          <div class="about-line">
+            <span>站点结构</span>
+            <strong>Markdown 文章 / 静态页面 / GitHub Pages</strong>
+          </div>
+          <div class="about-links" aria-label="相关入口">
+            <a href="./index.html#articles">阅读文章</a>
+            <a href="https://github.com/" target="_blank" rel="noreferrer">GitHub</a>
+            <a href="mailto:hello@example.com">Email</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="about-note" aria-labelledby="about-note-title">
+        <p class="kicker">Quiet note</p>
+        <h2 id="about-note-title">关于这个站点</h2>
+        <p>
+          好的个人网站不需要吵闹。它只要让人一打开，就知道这里有人认真生活，
+          认真保存自己的想法。
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>© 2026 灰玻璃日记</span>
+      <a href="./index.html#articles">文章</a>
+      <a href="./index.html#archive">归档</a>
+      <a href="./index.html#tags">标签</a>
+      <a href="./login.html" data-guest-only>作者入口</a>
+      <a href="./compose.html" data-authenticated-only hidden>写作</a>
+      <a href="./manage.html" data-authenticated-only hidden>管理</a>
+      <button type="button" data-auth-logout data-authenticated-only hidden>退出</button>
+      <a href="https://github.com/" target="_blank" rel="noreferrer">GitHub</a>
+    </footer>
+
+    <script src="./auth.js"></script>
+    <script src="./page-transition.js"></script>
+    <script src="./cursor-trail.js"></script>
+  </body>
+</html>

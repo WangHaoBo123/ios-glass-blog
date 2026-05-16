@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="灰玻璃日记的 404 页面。" />
+    <meta name="theme-color" content="#202124" />
+    <meta name="robots" content="noindex, follow" />
+    <title>页面走丢了 - 灰玻璃日记</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#content">跳到正文</a>
+
+    <div class="ambient" aria-hidden="true" data-ambient>
+      <span class="ambient-bar ambient-bar-a" data-ambient-bar="a"></span>
+      <span class="ambient-bar ambient-bar-b" data-ambient-bar="b"></span>
+    </div>
+
+    <header class="site-header">
+      <nav class="nav-shell" aria-label="主导航">
+        <a class="brand" href="./index.html" aria-label="灰玻璃日记首页">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>灰玻璃日记</span>
+        </a>
+
+        <div class="nav-links" aria-label="页面栏目">
+          <a href="./index.html#articles">文章</a>
+          <a href="./index.html#archive">归档</a>
+          <a href="./index.html#tags">标签</a>
+          <a href="./about.html">关于</a>
+        </div>
+      </nav>
+    </header>
+
+    <main id="content" class="page-shell not-found-shell">
+      <section class="compose-panel not-found-panel" aria-labelledby="not-found-title">
+        <p class="kicker">404</p>
+        <h1 id="not-found-title">这个页面暂时没有内容</h1>
+        <p>
+          可能是链接写错了，或者文章还没有发布到静态文件里。可以回到首页，从文章、归档或标签重新进入。
+        </p>
+        <div class="button-row">
+          <a class="publish-button" href="./index.html#articles">回到文章</a>
+          <a class="secondary-button" href="./index.html#archive">查看归档</a>
+          <a class="secondary-button" href="./index.html#tags">按标签找</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>© 2026 灰玻璃日记</span>
+      <a href="./index.html#articles">文章</a>
+      <a href="./about.html">关于</a>
+      <a href="https://github.com/" target="_blank" rel="noreferrer">GitHub</a>
+    </footer>
+
+    <script src="./page-transition.js"></script>
+    <script src="./cursor-trail.js"></script>
+  </body>
+</html>

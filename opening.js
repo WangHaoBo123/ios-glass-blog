@@ -1,0 +1,42 @@
+(function () {
+  const isHomePage = /(?:^|\/)index\.html$/i.test(window.location.pathname) || /\/$/.test(window.location.pathname);
+  const isArticleList = !window.location.hash || window.location.hash === "#articles";
+  const navigation = performance.getEntriesByType?.("navigation")?.[0];
+  const navigationType = navigation?.type || "";
+  const shouldPlayForNavigation = navigationType === "reload";
+
+  if (
+    !isHomePage ||
+    !isArticleList ||
+    !shouldPlayForNavigation ||
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+  ) {
+    return;
+  }
+
+  const overlay = document.createElement("section");
+  overlay.className = "opening-screen";
+  overlay.setAttribute("aria-label", "博客开幕介绍");
+  overlay.innerHTML = `
+    <div class="opening-copy">
+      <p>Gray Glass Diary</p>
+      <h2>Thoughts, projects, and quiet notes behind a frosted pane.</h2>
+    </div>
+  `;
+
+  document.body.append(overlay);
+  document.body.classList.add("opening-active");
+
+  window.setTimeout(() => {
+    overlay.classList.add("is-dispersing");
+  }, 1700);
+
+  window.setTimeout(() => {
+    overlay.classList.add("is-leaving");
+  }, 3100);
+
+  window.setTimeout(() => {
+    overlay.remove();
+    document.body.classList.remove("opening-active");
+  }, 4300);
+})();

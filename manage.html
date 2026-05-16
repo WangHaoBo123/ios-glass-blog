@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="灰玻璃日记的本地文章管理台。" />
+    <meta name="theme-color" content="#202124" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>管理 - 灰玻璃日记</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#content">跳到正文</a>
+
+    <div class="ambient" aria-hidden="true" data-ambient>
+      <span class="ambient-bar ambient-bar-a" data-ambient-bar="a"></span>
+      <span class="ambient-bar ambient-bar-b" data-ambient-bar="b"></span>
+    </div>
+
+    <header class="site-header">
+      <nav class="nav-shell" aria-label="主导航">
+        <a class="brand" href="./index.html" aria-label="灰玻璃日记首页">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>灰玻璃日记</span>
+        </a>
+
+        <div class="nav-links" aria-label="页面栏目">
+          <a href="./index.html#articles">文章</a>
+          <a href="./index.html#archive">归档</a>
+          <a href="./index.html#tags">标签</a>
+          <a href="./compose.html">写作</a>
+          <a href="./manage.html" aria-current="page">管理</a>
+          <a href="./about.html">关于</a>
+          <button type="button" data-auth-logout>退出</button>
+        </div>
+      </nav>
+    </header>
+
+    <main id="content" class="page-shell manager-shell" data-authenticated-only hidden>
+      <section class="intro-grid compose-intro" aria-labelledby="manager-title">
+        <div class="intro-copy">
+          <p class="kicker">Posts</p>
+          <h1 id="manager-title">文章管理</h1>
+          <p class="intro-text">
+            在这里整理本机预览里的文章。可以删除、改分类、改标题摘要和正文；静态文件里的文章会以本地覆盖的方式保存。
+          </p>
+        </div>
+      </section>
+
+      <section class="manager-layout" aria-label="文章管理工作台">
+        <aside class="compose-panel manager-list-panel">
+          <div class="manager-toolbar">
+            <label class="search-field manager-search">
+              <span class="search-icon" aria-hidden="true"></span>
+              <span class="sr-only">搜索文章</span>
+            <input type="search" data-manager-search placeholder="搜索标题、分类或标签" autocomplete="off" />
+            </label>
+            <a class="secondary-button" href="./compose.html">写新文章</a>
+            <button class="secondary-button" type="button" data-export-backup>导出备份</button>
+            <button class="secondary-button" type="button" data-import-backup>导入备份</button>
+            <button class="secondary-button" type="button" data-clean-embedded-images>清理旧图片缓存</button>
+            <input class="image-import-input" data-backup-input type="file" accept="application/json,.json" />
+          </div>
+
+          <div class="manager-summary">
+            <span data-manager-count>0 篇文章</span>
+            <span data-manager-hidden>0 篇隐藏</span>
+          </div>
+
+          <div class="manager-post-list" data-manager-list></div>
+        </aside>
+
+        <section class="manager-edit-shell" data-manager-editor hidden>
+          <div class="block-toolbar" role="toolbar" aria-label="Markdown 格式工具">
+            <button type="button" data-manage-md="h1" data-tooltip="一级标题" data-shortcut="Ctrl+Alt+1" aria-label="一级标题">H1</button>
+            <button type="button" data-manage-md="h2" data-tooltip="二级标题" data-shortcut="Ctrl+Alt+2" aria-label="二级标题">H2</button>
+            <button type="button" data-manage-md="h3" data-tooltip="三级标题" data-shortcut="Ctrl+Alt+3" aria-label="三级标题">H3</button>
+            <button type="button" data-manage-md="h4" data-tooltip="四级标题" data-shortcut="Ctrl+Alt+4" aria-label="四级标题">H4</button>
+            <button type="button" data-manage-md="bold" data-tooltip="加粗选中文字" data-shortcut="Ctrl+B" aria-label="加粗选中文字">B</button>
+            <button type="button" data-manage-md="italic" data-tooltip="斜体选中文字" data-shortcut="Ctrl+I" aria-label="斜体选中文字">I</button>
+            <span class="highlight-tool" aria-label="荧光笔标记">
+              <button class="highlight-button" type="button" data-manage-md="highlight" data-tooltip="荧光笔标记" data-shortcut="Ctrl+Shift+H" aria-label="荧光笔标记选中文字">H</button>
+              <input data-manage-highlight-color type="color" value="#ffd966" title="选择荧光笔颜色" aria-label="选择荧光笔颜色" />
+            </span>
+            <button type="button" data-manage-md="quote" data-tooltip="引用段落" data-shortcut="Ctrl+Alt+Q" aria-label="引用段落">“”</button>
+            <button type="button" data-manage-md="list" data-tooltip="项目列表" data-shortcut="Ctrl+Alt+L" aria-label="项目列表">•</button>
+            <button type="button" data-manage-md="codeblock" data-tooltip="代码块" data-shortcut="Ctrl+Alt+C" aria-label="代码块">{ }</button>
+            <button type="button" data-manage-md="link" data-tooltip="插入链接" data-shortcut="Ctrl+K" aria-label="插入链接">↗</button>
+            <button type="button" data-manage-connect-assets data-tooltip="连接图片保存目录" data-shortcut="选择项目根目录" aria-label="连接图片保存目录">图片目录</button>
+            <button type="button" data-manage-import-image data-tooltip="导入图片" data-shortcut="也可以拖入图片" aria-label="导入图片">图片</button>
+          </div>
+
+          <div class="compose-panel editor-canvas manager-editor-canvas" data-manage-editor-canvas>
+            <input
+              class="editor-title-input"
+              data-manage-title
+              type="text"
+              autocomplete="off"
+              aria-label="文章标题"
+            />
+
+            <div class="permalink-row">
+              <span>固定链接</span>
+              <code>posts/</code>
+              <input data-manage-slug type="text" autocomplete="off" aria-label="文章 slug" readonly />
+              <code>.md</code>
+              <span class="manager-source-badge" data-manager-source>本地</span>
+            </div>
+
+            <input class="image-import-input" data-manage-image-input type="file" accept="image/*" multiple />
+            <div class="media-flow" data-manage-media-flow aria-label="文章图片块排序"></div>
+
+            <textarea
+              class="block-editor manager-content"
+              data-manage-content
+              rows="24"
+              aria-label="文章正文"
+            ></textarea>
+          </div>
+
+          <aside class="compose-panel document-sidebar manager-document-sidebar">
+            <div class="sidebar-section">
+              <div class="sidebar-title">
+                <span>正在编辑</span>
+                <strong data-manager-edit-title>选择一篇文章</strong>
+              </div>
+              <p class="publish-note">这里和写作页使用同一套编辑体验。保存后，本机首页会使用这个版本。</p>
+            </div>
+
+            <div class="sidebar-section">
+              <label class="field">
+                <span>日期</span>
+                <input data-manage-date type="date" />
+              </label>
+
+              <label class="field">
+                <span>分类</span>
+                <input data-manage-category type="text" list="manage-category-options" autocomplete="off" />
+                <datalist id="manage-category-options"></datalist>
+              </label>
+
+              <label class="field">
+                <span>标签</span>
+                <input data-manage-tags type="text" autocomplete="off" />
+              </label>
+            </div>
+
+            <div class="sidebar-section">
+              <label class="field">
+                <span>摘要</span>
+                <textarea data-manage-summary rows="5"></textarea>
+              </label>
+            </div>
+
+            <div class="sidebar-section manager-actions">
+              <button class="publish-button" type="button" data-save-managed-post>保存更改</button>
+              <button class="secondary-button" type="button" data-open-managed-post>打开文章</button>
+              <button class="danger-button" type="button" data-delete-managed-post>删除文章</button>
+            </div>
+
+            <p class="status-message" data-manager-status aria-live="polite"></p>
+          </aside>
+        </section>
+
+        <section class="compose-panel manager-empty" data-manager-empty>
+          <p class="kicker">Empty</p>
+          <h2>先选择一篇文章</h2>
+          <p>左侧列表里选中文章后，就可以改分类、编辑内容或删除。</p>
+        </section>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>© 2026 灰玻璃日记</span>
+      <a href="./index.html#articles">文章</a>
+      <a href="./index.html#archive">归档</a>
+      <a href="./index.html#tags">标签</a>
+      <a href="./about.html">关于</a>
+      <a href="./compose.html">写作</a>
+      <button type="button" data-auth-logout>退出</button>
+      <a href="https://github.com/" target="_blank" rel="noreferrer">GitHub</a>
+    </footer>
+
+    <script src="./auth.js"></script>
+    <script src="./page-transition.js"></script>
+    <script src="./cursor-trail.js"></script>
+    <script src="./media-editor.js"></script>
+    <script src="./backup.js"></script>
+    <script src="./manage.js"></script>
+  </body>
+</html>

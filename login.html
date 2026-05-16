@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="灰玻璃日记的作者入口。" />
+    <meta name="theme-color" content="#202124" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>作者入口 - 灰玻璃日记</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#content">跳到正文</a>
+
+    <div class="ambient" aria-hidden="true" data-ambient>
+      <span class="ambient-bar ambient-bar-a" data-ambient-bar="a"></span>
+      <span class="ambient-bar ambient-bar-b" data-ambient-bar="b"></span>
+    </div>
+
+    <header class="site-header">
+      <nav class="nav-shell" aria-label="主导航">
+        <a class="brand" href="./index.html" aria-label="灰玻璃日记首页">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>灰玻璃日记</span>
+        </a>
+
+        <div class="nav-links" aria-label="页面栏目">
+          <a href="./index.html#articles">文章</a>
+          <a href="./index.html#archive">归档</a>
+          <a href="./index.html#tags">标签</a>
+          <a href="./about.html">关于</a>
+          <a href="./compose.html" data-authenticated-only hidden>写作</a>
+          <a href="./manage.html" data-authenticated-only hidden>管理</a>
+          <button type="button" data-auth-logout data-authenticated-only hidden>退出</button>
+        </div>
+      </nav>
+    </header>
+
+    <main id="content" class="page-shell auth-shell">
+      <section class="compose-panel auth-panel" data-auth-page aria-labelledby="auth-title">
+        <div class="auth-copy">
+          <p class="kicker" data-auth-mode>Author login</p>
+          <h1 id="auth-title">作者入口</h1>
+          <p>公开页面只负责阅读，写作和管理留在作者后台。</p>
+        </div>
+
+        <form class="auth-form" data-auth-login-form hidden>
+          <label class="field">
+            <span>作者</span>
+            <input type="text" value="灰玻璃日记作者" data-author-name readonly />
+          </label>
+
+          <label class="field">
+            <span>密码</span>
+            <input name="password" type="password" autocomplete="current-password" required />
+          </label>
+
+          <div class="button-row">
+            <button class="publish-button" type="submit">登录</button>
+            <button class="secondary-button" type="button" data-auth-reset hidden>重置本机账号</button>
+          </div>
+        </form>
+
+        <form class="auth-form" data-auth-setup-form hidden>
+          <label class="field">
+            <span>作者名</span>
+            <input name="name" type="text" autocomplete="username" value="灰玻璃日记作者" />
+          </label>
+
+          <label class="field">
+            <span>密码</span>
+            <input name="password" type="password" autocomplete="new-password" minlength="8" required />
+          </label>
+
+          <label class="field">
+            <span>确认密码</span>
+            <input name="confirm" type="password" autocomplete="new-password" minlength="8" required />
+          </label>
+
+          <div class="button-row">
+            <button class="publish-button" type="submit">注册作者账号</button>
+            <a class="secondary-button" href="./index.html">返回首页</a>
+          </div>
+        </form>
+
+        <div class="auth-locked" data-auth-locked hidden>
+          <h2>公开站点不开放注册</h2>
+          <p>请在本机预览环境写作，然后把文章发布到 GitHub Pages。</p>
+          <a class="secondary-button" href="./index.html">返回首页</a>
+        </div>
+
+        <p class="status-message auth-status" data-auth-status aria-live="polite"></p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>© 2026 灰玻璃日记</span>
+      <a href="./index.html#articles">文章</a>
+      <a href="./index.html#archive">归档</a>
+      <a href="./index.html#tags">标签</a>
+      <a href="https://github.com/" target="_blank" rel="noreferrer">GitHub</a>
+    </footer>
+
+    <script src="./auth.js"></script>
+    <script src="./page-transition.js"></script>
+    <script src="./cursor-trail.js"></script>
+  </body>
+</html>
