@@ -115,6 +115,7 @@ const fallbackPosts = [
 let posts = [];
 let activeFilter = "all";
 let activeProgressFrame = 0;
+let listTransitionTimer = 0;
 
 function playScriptHeroWriting() {
   if (!scriptHeroTitle) return;
@@ -619,10 +620,12 @@ function renderFeatured(post) {
   if (!featuredPost) return;
 
   if (!post) {
+    featuredPost.classList.remove("is-list-leaving", "is-list-entering");
     featuredPost.hidden = true;
     return;
   }
 
+  featuredPost.classList.remove("is-list-leaving", "is-list-entering");
   featuredPost.hidden = false;
   const manageLink = authorIsSignedIn()
     ? `<a class="manage-link featured-manage-link" href="./manage.html#post/${encodeURIComponent(post.slug)}">管理</a>`
@@ -669,6 +672,36 @@ function renderList() {
   if (emptyState) {
     emptyState.hidden = filtered.length > 0;
   }
+}
+
+function renderListWithMotion() {
+  const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  const hasRenderedList = (featuredPost?.innerHTML || postList?.innerHTML);
+
+  window.clearTimeout(listTransitionTimer);
+
+  if (reduceMotion || !hasRenderedList) {
+    renderList();
+    return;
+  }
+
+  const containers = [featuredPost, postList].filter(Boolean);
+  containers.forEach((container) => {
+    container.classList.remove("is-list-entering");
+    container.classList.add("is-list-leaving");
+  });
+
+  listTransitionTimer = window.setTimeout(() => {
+    renderList();
+    containers.forEach((container) => {
+      container.classList.remove("is-list-leaving");
+      container.classList.add("is-list-entering");
+    });
+
+    listTransitionTimer = window.setTimeout(() => {
+      containers.forEach((container) => container.classList.remove("is-list-entering"));
+    }, 460);
+  }, 150);
 }
 
 function renderArchive() {
@@ -1011,7 +1044,10 @@ filterList?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-filter]");
   if (!button || !filterList.contains(button)) return;
 
-  activeFilter = button.dataset.filter || "all";
+  const nextFilter = button.dataset.filter || "all";
+  if (nextFilter === activeFilter && !window.location.hash.startsWith("#post/")) return;
+
+  activeFilter = nextFilter;
 
   filterList.querySelectorAll("[data-filter]").forEach((item) => {
     const isActive = item === button;
@@ -1024,7 +1060,7 @@ filterList?.addEventListener("click", (event) => {
     return;
   }
 
-  renderList();
+  renderListWithMotion();
 });
 
 searchInput?.addEventListener("input", () => {
@@ -1032,7 +1068,7 @@ searchInput?.addEventListener("input", () => {
     window.location.hash = "#articles";
     return;
   }
-  renderList();
+  renderListWithMotion();
 });
 
 window.addEventListener("hashchange", routeWithTransition);
