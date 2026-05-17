@@ -202,7 +202,6 @@ body::after {
 
 body::before,
 body::after,
-.page-shell,
 .site-header,
 .site-footer {
   transform: translateZ(0);
