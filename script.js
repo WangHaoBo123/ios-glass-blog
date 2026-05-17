@@ -12,8 +12,11 @@ const readerSummary = document.querySelector("[data-reader-summary]");
 const readerTags = document.querySelector("[data-reader-tags]");
 const readerBody = document.querySelector("[data-reader-body]");
 const readerToc = document.querySelector("[data-reader-toc]");
+const articleSignature = document.querySelector("[data-article-signature]");
+const articleSignatureName = document.querySelector("[data-article-signature-name]");
 const bottomReadingProgress = document.querySelector("[data-bottom-reading-progress]");
 const bottomReadingProgressBar = document.querySelector("[data-bottom-reading-progress-bar]");
+const backToTopButton = document.querySelector("[data-back-to-top]");
 const floatingReaderTitle = document.querySelector("[data-reader-floating-title]");
 const floatingReaderTitleText = document.querySelector("[data-reader-floating-title-text]");
 const floatingReadingProgressBar = document.querySelector("[data-floating-reading-progress-bar]");
@@ -31,6 +34,7 @@ const latestDate = document.querySelector("[data-latest-date]");
 const ambient = document.querySelector("[data-ambient]");
 const ambientBarA = document.querySelector('[data-ambient-bar="a"]');
 const ambientBarB = document.querySelector('[data-ambient-bar="b"]');
+const profileName = document.querySelector(".profile-copy strong");
 
 const categoryLabels = {
   tech: "技术",
@@ -218,7 +222,7 @@ function renderInlineImage(line) {
 
   return `
     <figure class="article-image-block">
-      <img src="${escapeHtml(safeUrl(image[2]))}" alt="${escapeHtml(image[1] || "文章图片")}" />
+      <img class="is-loading" src="${escapeHtml(safeUrl(image[2]))}" alt="${escapeHtml(image[1] || "文章图片")}" loading="lazy" decoding="async" />
       ${image[1] ? `<figcaption>${escapeHtml(image[1])}</figcaption>` : ""}
     </figure>
   `;
@@ -529,6 +533,49 @@ function renderReaderToc() {
   `;
 }
 
+function prepareArticleImages() {
+  if (!readerBody) return;
+
+  readerBody.querySelectorAll(".article-image-block img").forEach((image) => {
+    const markLoaded = () => {
+      image.classList.remove("is-loading");
+      image.classList.add("is-loaded");
+    };
+
+    if (image.complete && image.naturalWidth > 0) {
+      markLoaded();
+      return;
+    }
+
+    image.addEventListener("load", markLoaded, { once: true });
+    image.addEventListener("error", markLoaded, { once: true });
+  });
+}
+
+function updateActiveTocHeading() {
+  if (!readerToc || !readerBody || !reader || reader.hidden) return;
+
+  const links = [...readerToc.querySelectorAll("[data-toc-target]")];
+  if (!links.length) return;
+
+  const headings = [...readerBody.querySelectorAll("h1, h2, h3, h4")].filter((heading) => heading.id);
+  if (!headings.length) return;
+
+  const headerHeight = document.querySelector(".site-header")?.getBoundingClientRect().height || 0;
+  const activationLine = headerHeight + Math.min(150, Math.max(92, window.innerHeight * 0.18));
+  let activeHeading = headings[0];
+
+  headings.forEach((heading) => {
+    if (heading.getBoundingClientRect().top <= activationLine) {
+      activeHeading = heading;
+    }
+  });
+
+  links.forEach((link) => {
+    link.classList.toggle("is-active", link.dataset.tocTarget === activeHeading.id);
+  });
+}
+
 function contentWithLegacyImages(content, images) {
   if (!Array.isArray(images) || !images.length) return String(content || "");
 
@@ -767,6 +814,9 @@ function showPost(slug) {
   if (readerSummary) readerSummary.textContent = post.summary;
   if (readerTags) readerTags.innerHTML = renderTagList(post.tags);
   if (readerBody) readerBody.innerHTML = markdownToHtml(contentWithLegacyImages(post.content, post.images));
+  prepareArticleImages();
+  if (articleSignature) articleSignature.hidden = false;
+  if (articleSignatureName) articleSignatureName.textContent = profileName?.textContent?.trim() || "StaryTra 32";
   renderPostNeighbors(post);
   renderReaderToc();
   startReadingProgress();
@@ -880,6 +930,10 @@ function syncChromeState() {
     const showTitle = reading && readerTop < -72;
     floatingReaderTitle.hidden = !showTitle;
   }
+
+  if (backToTopButton) {
+    backToTopButton.hidden = !(reading && window.scrollY > 520);
+  }
 }
 
 function queueReadingProgressUpdate() {
@@ -888,6 +942,7 @@ function queueReadingProgressUpdate() {
     activeProgressFrame = 0;
     syncChromeState();
     updateReadingProgress();
+    updateActiveTocHeading();
   });
 }
 
@@ -896,6 +951,7 @@ function startReadingProgress() {
   if (bottomReadingProgress) bottomReadingProgress.hidden = false;
   syncChromeState();
   updateReadingProgress();
+  updateActiveTocHeading();
   window.addEventListener("scroll", queueReadingProgressUpdate, { passive: true });
   window.addEventListener("resize", queueReadingProgressUpdate);
 }
@@ -909,8 +965,11 @@ function stopReadingProgress() {
   window.removeEventListener("resize", queueReadingProgressUpdate);
   if (bottomReadingProgress) bottomReadingProgress.hidden = true;
   if (bottomReadingProgressBar) bottomReadingProgressBar.style.transform = "scaleX(0)";
+  if (backToTopButton) backToTopButton.hidden = true;
+  if (articleSignature) articleSignature.hidden = true;
   if (floatingReaderTitle) floatingReaderTitle.hidden = true;
   if (floatingReadingProgressBar) floatingReadingProgressBar.style.transform = "scaleX(0)";
+  readerToc?.querySelectorAll("[data-toc-target]").forEach((link) => link.classList.remove("is-active"));
   document.body.classList.remove("is-reading-post");
 }
 
@@ -976,6 +1035,16 @@ document.addEventListener("click", async (event) => {
     scrollToArticleHeading(target);
     readerToc?.querySelectorAll("[data-toc-target]").forEach((link) => {
       link.classList.toggle("is-active", link === tocLink);
+    });
+    return;
+  }
+
+  const backToTop = event.target.closest("[data-back-to-top]");
+  if (backToTop) {
+    event.preventDefault();
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
     });
     return;
   }
