@@ -30,6 +30,11 @@
     window.clearTimeout(holdTimer);
   }
 
+  function reset() {
+    clearTransitionTimers();
+    overlay.classList.remove("is-visible", "is-entering");
+  }
+
   function begin() {
     clearTransitionTimers();
     overlay.classList.remove("is-entering");
@@ -60,6 +65,7 @@
     if (sessionStorage.getItem(transitionKey) !== "1") return;
     sessionStorage.removeItem(transitionKey);
 
+    reset();
     overlay.classList.add("is-visible");
     holdTimer = window.setTimeout(end, 80);
   }
@@ -99,7 +105,26 @@
     run,
     begin,
     end,
+    reset,
   };
+
+  window.addEventListener("pageshow", (event) => {
+    const navigation = performance.getEntriesByType?.("navigation")?.[0];
+    if (event.persisted || navigation?.type === "back_forward") {
+      sessionStorage.removeItem(transitionKey);
+      reset();
+    }
+  });
+
+  window.addEventListener("pagehide", () => {
+    reset();
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      reset();
+    }
+  });
 
   showEntryTransition();
   document.addEventListener("click", handleLinkClick);
