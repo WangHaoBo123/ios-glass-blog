@@ -1,5 +1,5 @@
 (function () {
   window.GlassBlogConfig = {
-    apiBaseUrl: "",
+    apiBaseUrl: "https://ios-glass-blog-publisher.starytra32.workers.dev",
   };
 })();
