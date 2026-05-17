@@ -550,17 +550,17 @@ function renderFeatured(post) {
 
   featuredPost.hidden = false;
   const manageLink = authorIsSignedIn()
-    ? `<a class="manage-link" href="./manage.html#post/${encodeURIComponent(post.slug)}">管理</a>`
+    ? `<a class="manage-link featured-manage-link" href="./manage.html#post/${encodeURIComponent(post.slug)}">管理</a>`
     : "";
   featuredPost.innerHTML = `
-    <div class="post-meta">${renderMeta(post)}</div>
-    <h2>${escapeHtml(post.title)}</h2>
-    <p>${escapeHtml(post.summary)}</p>
-    <div class="tag-list">${renderTagList(post.tags)}</div>
-    <div class="post-actions">
-      <a class="read-link" href="#post/${encodeURIComponent(post.slug)}" aria-label="阅读文章：${escapeHtml(post.title)}">阅读全文</a>
-      ${manageLink}
-    </div>
+    <a class="featured-post-link" href="#post/${encodeURIComponent(post.slug)}" aria-label="阅读文章：${escapeHtml(post.title)}">
+      <div class="post-meta">${renderMeta(post)}</div>
+      <h2>${escapeHtml(post.title)}</h2>
+      <p>${escapeHtml(post.summary)}</p>
+      <div class="tag-list">${renderTagList(post.tags)}</div>
+      <span class="read-link">阅读全文</span>
+    </a>
+    ${manageLink}
   `;
 }
 
