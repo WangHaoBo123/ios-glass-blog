@@ -493,13 +493,8 @@ function renderReaderToc() {
     }))
     .filter((heading) => heading.id && heading.text);
 
-  if (!headings.length) {
-    readerToc.hidden = true;
-    readerToc.innerHTML = "";
-    return;
-  }
-
   readerToc.hidden = false;
+  readerToc.classList.toggle("is-progress-only", !headings.length);
   readerToc.innerHTML = `
     <div class="reader-toc-head">
       <p class="reader-toc-title">目录</p>
@@ -509,15 +504,19 @@ function renderReaderToc() {
     </div>
     <p class="reading-progress-copy">阅读进度 <span data-reading-progress-text>0%</span></p>
     <nav class="toc-list" aria-label="文章标题导航">
-      ${headings
-        .map(
-          (heading) => `
+      ${
+        headings.length
+          ? headings
+              .map(
+                (heading) => `
             <a class="toc-link toc-level-${heading.level}" href="#${escapeHtml(heading.id)}" data-toc-target="${escapeHtml(heading.id)}">
               ${escapeHtml(heading.text)}
             </a>
           `,
-        )
-        .join("")}
+              )
+              .join("")
+          : '<p class="toc-empty">这篇文章暂时没有小标题。</p>'
+      }
     </nav>
   `;
 }

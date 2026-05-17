@@ -1382,6 +1382,13 @@ h1 {
   gap: 4px;
 }
 
+.toc-empty {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
 .toc-link {
   display: block;
   padding: 7px 8px;
