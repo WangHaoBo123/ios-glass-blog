@@ -99,9 +99,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.28), transparent 31%),
-    linear-gradient(106deg, transparent 0 18%, rgba(123, 128, 136, 0.16) 18% 33%, transparent 33% 58%, rgba(255, 255, 255, 0.22) 58% 71%, transparent 71%),
-    linear-gradient(24deg, transparent 0 42%, rgba(83, 88, 96, 0.12) 42% 57%, transparent 57%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.11) 14%, transparent 34%),
+    linear-gradient(106deg, transparent 0 15%, rgba(123, 128, 136, 0.06) 17%, rgba(123, 128, 136, 0.16) 21% 30%, rgba(123, 128, 136, 0.055) 34%, transparent 37% 55%, rgba(255, 255, 255, 0.07) 57%, rgba(255, 255, 255, 0.22) 61% 68%, rgba(255, 255, 255, 0.06) 72%, transparent 75%),
+    linear-gradient(24deg, transparent 0 39%, rgba(83, 88, 96, 0.04) 41%, rgba(83, 88, 96, 0.12) 45% 54%, rgba(83, 88, 96, 0.04) 58%, transparent 61%),
     linear-gradient(180deg, var(--bg-soft), var(--bg));
   background-position:
     0 0,
@@ -394,9 +394,9 @@ input:focus-visible {
   z-index: 0;
   pointer-events: none;
   background:
-    linear-gradient(116deg, transparent 0 22%, rgba(255, 255, 255, 0.2) 22% 33%, transparent 33% 55%, rgba(92, 99, 110, 0.1) 55% 66%, transparent 66%),
-    linear-gradient(151deg, transparent 0 38%, rgba(255, 255, 255, 0.14) 38% 48%, transparent 48%);
-  filter: blur(10px);
+    linear-gradient(116deg, transparent 0 18%, rgba(255, 255, 255, 0.05) 20%, rgba(255, 255, 255, 0.2) 25% 30%, rgba(255, 255, 255, 0.05) 34%, transparent 38% 52%, rgba(92, 99, 110, 0.035) 54%, rgba(92, 99, 110, 0.1) 58% 63%, rgba(92, 99, 110, 0.035) 67%, transparent 70%),
+    linear-gradient(151deg, transparent 0 34%, rgba(255, 255, 255, 0.04) 36%, rgba(255, 255, 255, 0.14) 40% 46%, rgba(255, 255, 255, 0.04) 50%, transparent 54%);
+  filter: blur(14px) saturate(112%);
   transform: translateZ(0);
 }
 
@@ -406,7 +406,7 @@ input:focus-visible {
   pointer-events: none;
   content: "";
   background:
-    linear-gradient(102deg, transparent 0 26%, rgba(255, 255, 255, 0.1) 27% 29%, transparent 32%),
+    linear-gradient(102deg, transparent 0 22%, rgba(255, 255, 255, 0.03) 25%, rgba(255, 255, 255, 0.1) 28% 30%, rgba(255, 255, 255, 0.025) 34%, transparent 38%),
     radial-gradient(circle at 72% 22%, rgba(255, 255, 255, 0.08), transparent 28%);
   opacity: 0.42;
   mix-blend-mode: screen;
