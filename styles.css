@@ -939,13 +939,13 @@ h1 {
 .script-hero-title {
   position: relative;
   isolation: isolate;
-  max-width: 1060px;
+  max-width: 100%;
   font-family: "Palace Script MT", "Palace Script", cursive;
-  font-size: clamp(68px, 8.2vw, 104px);
+  font-size: clamp(68px, 6.7vw, 86px);
   font-weight: 400;
   letter-spacing: 0;
   line-height: 0.96;
-  text-wrap: balance;
+  white-space: nowrap;
 }
 
 .script-hero-title span {
@@ -4182,7 +4182,8 @@ h1 {
   }
 
   .script-hero-title {
-    font-size: clamp(58px, 14vw, 78px);
+    font-size: clamp(48px, 11vw, 72px);
+    white-space: normal;
   }
 
   .intro-text {
@@ -4315,6 +4316,7 @@ h1 {
 
   .script-hero-title {
     font-size: clamp(50px, 17vw, 66px);
+    white-space: normal;
   }
 
   .featured-post,
