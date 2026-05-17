@@ -558,7 +558,6 @@ function renderFeatured(post) {
       <h2>${escapeHtml(post.title)}</h2>
       <p>${escapeHtml(post.summary)}</p>
       <div class="tag-list">${renderTagList(post.tags)}</div>
-      <span class="read-link">阅读全文</span>
     </a>
     ${manageLink}
   `;

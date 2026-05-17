@@ -1271,12 +1271,6 @@ h1 {
   align-self: end;
 }
 
-.featured-post .read-link {
-  grid-column: 2;
-  grid-row: 3;
-  align-self: end;
-}
-
 .read-link {
   align-self: flex-start;
   padding-bottom: 4px;
@@ -3704,8 +3698,7 @@ h1 {
   }
 
   .featured-post .tag-list,
-  .featured-post .post-actions,
-  .featured-post .read-link {
+  .featured-post .post-actions {
     grid-column: 1;
     grid-row: auto;
     align-self: start;
