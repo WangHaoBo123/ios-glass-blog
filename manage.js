@@ -30,6 +30,7 @@ const mediaFlow = document.querySelector("[data-manage-media-flow]");
 const editorCanvas = document.querySelector("[data-manage-editor-canvas]");
 const markdownButtons = [...document.querySelectorAll("[data-manage-md]")];
 const highlightColorInput = document.querySelector("[data-manage-highlight-color]");
+const emojiToggleButton = document.querySelector("[data-manage-emoji-toggle]");
 const ambient = document.querySelector("[data-ambient]");
 const ambientBarA = document.querySelector('[data-ambient-bar="a"]');
 const ambientBarB = document.querySelector('[data-ambient-bar="b"]');
@@ -113,6 +114,12 @@ let staticPostsCache = [];
 let selectedSlug = "";
 let mediaEditor = null;
 let legacyImages = [];
+const emojiGroups = [
+  { label: "常用", items: ["😊", "😂", "🤣", "😍", "🥰", "😎", "😭", "😅", "👍", "👏", "🙏", "💪"] },
+  { label: "心情", items: ["✨", "🌙", "☕", "🍃", "🔥", "💡", "📌", "✅", "⚠️", "🎯", "📝", "📚"] },
+  { label: "装饰", items: ["❤️", "🖤", "🤍", "⭐", "🌟", "💫", "🌈", "❄️", "🌊", "🌿", "🎧", "🧊"] },
+];
+let emojiPanel = null;
 
 function escapeHtml(value) {
   return String(value)
@@ -319,6 +326,27 @@ function wrapSelection(before, after = before, fallback = "文字") {
   mediaEditor?.wrapSelection(before, after, fallback);
 }
 
+function insertPlainText(text) {
+  const value = String(text || "");
+  if (!value) return;
+
+  const textarea = mediaEditor?.activeTextArea?.();
+  if (textarea && mediaEditor?.replaceText) {
+    const index = Number(textarea.dataset.blockIndex);
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const next = `${textarea.value.slice(0, start)}${value}${textarea.value.slice(end)}`;
+    const cursor = start + value.length;
+    mediaEditor.replaceText(index, next, cursor, cursor);
+    return;
+  }
+
+  const start = contentInput.selectionStart ?? contentInput.value.length;
+  const end = contentInput.selectionEnd ?? start;
+  contentInput.setRangeText(value, start, end, "end");
+  contentInput.focus({ preventScroll: true });
+}
+
 function toggleWrap(before, after = before, fallback = "文字") {
   mediaEditor?.toggleWrap(before, after, fallback);
 }
@@ -354,11 +382,51 @@ function insertMarkdown(command) {
     list: () => setLinePrefix("- ", /^\s{0,3}[-*+]\s+/, "列表项"),
     codeblock: () => wrapSelection("```\n", "\n```", "console.log(\"hello blog\");"),
     link: () => wrapSelection("[", "](https://example.com)", "链接文字"),
+    emoji: () => toggleEmojiPanel(),
   };
 
   if (!actions[command]) return false;
   actions[command]();
   return true;
+}
+
+function createEmojiPanel() {
+  if (emojiPanel) return emojiPanel;
+
+  emojiPanel = document.createElement("div");
+  emojiPanel.className = "emoji-panel";
+  emojiPanel.hidden = true;
+  emojiPanel.setAttribute("data-manage-emoji-panel", "");
+  emojiPanel.innerHTML = emojiGroups
+    .map(
+      (group) => `
+        <section class="emoji-group" aria-label="${escapeHtml(group.label)}">
+          <span>${escapeHtml(group.label)}</span>
+          <div>
+            ${group.items.map((emoji) => `<button type="button" data-manage-emoji="${escapeHtml(emoji)}" aria-label="插入 ${escapeHtml(emoji)}">${escapeHtml(emoji)}</button>`).join("")}
+          </div>
+        </section>
+      `,
+    )
+    .join("");
+
+  emojiToggleButton?.after(emojiPanel);
+  return emojiPanel;
+}
+
+function closeEmojiPanel() {
+  if (!emojiPanel) return;
+  emojiPanel.hidden = true;
+  emojiToggleButton?.classList.remove("is-active");
+  emojiToggleButton?.setAttribute("aria-expanded", "false");
+}
+
+function toggleEmojiPanel() {
+  const panel = createEmojiPanel();
+  const shouldOpen = panel.hidden;
+  panel.hidden = !shouldOpen;
+  emojiToggleButton?.classList.toggle("is-active", shouldOpen);
+  emojiToggleButton?.setAttribute("aria-expanded", String(shouldOpen));
 }
 
 function shortcutDigit(event) {
@@ -668,8 +736,30 @@ markdownButtons.forEach((button) => {
     insertMarkdown(button.dataset.manageMd);
   });
 });
+emojiToggleButton?.addEventListener("click", (event) => {
+  event.stopPropagation();
+  toggleEmojiPanel();
+});
+document.addEventListener("click", (event) => {
+  const emojiButton = event.target.closest("[data-manage-emoji]");
+  if (emojiButton) {
+    insertPlainText(emojiButton.dataset.manageEmoji);
+    closeEmojiPanel();
+    setStatus("已插入 Emoji");
+    return;
+  }
+
+  if (emojiPanel && !emojiPanel.hidden && !event.target.closest("[data-manage-emoji-panel], [data-manage-emoji-toggle]")) {
+    closeEmojiPanel();
+  }
+});
 document.addEventListener("keydown", (event) => {
   if (event.isComposing) return;
+
+  if (event.key === "Escape" && emojiPanel && !emojiPanel.hidden) {
+    closeEmojiPanel();
+    return;
+  }
 
   const isSaveShortcut = (event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === "s";
   if (isSaveShortcut) {
