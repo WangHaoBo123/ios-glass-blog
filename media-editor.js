@@ -99,6 +99,7 @@
     return blocks
       .map((block) => {
         if (block.type === "image") {
+          if (!block.src) return "";
           return `![${cleanAlt(block.alt)}](${block.src})`;
         }
         return block.text || "";
@@ -245,6 +246,7 @@
       this.draggingId = "";
       this.activeBlockIndex = 0;
       this.uploadsDirectoryHandle = null;
+      this.pendingUploads = new Map();
 
       this.source?.classList.add("is-source-hidden");
       this.render();
@@ -356,10 +358,19 @@
       this.root.innerHTML = this.blocks
         .map((block, index) => {
           if (block.type === "image") {
+            const statusText = block.uploadState === "uploading"
+              ? "上传中"
+              : block.uploadState === "failed"
+                ? "上传失败"
+                : block.src
+                  ? "已上传"
+                  : "待上传";
+            const displaySrc = block.previewSrc || block.src;
             return `
-              <figure class="media-block" draggable="true" data-media-id="${escapeHtml(block.id)}" data-block-index="${index}">
+              <figure class="media-block${block.uploadState ? ` is-${escapeHtml(block.uploadState)}` : ""}" draggable="true" data-media-id="${escapeHtml(block.id)}" data-block-index="${index}">
                 <div class="media-block-frame">
-                  <img src="${escapeHtml(block.src)}" alt="${escapeHtml(block.alt || "文章图片")}" draggable="false" />
+                  ${displaySrc ? `<img src="${escapeHtml(displaySrc)}" alt="${escapeHtml(block.alt || "文章图片")}" draggable="false" />` : ""}
+                  <span class="media-block-status">${escapeHtml(statusText)}</span>
                 </div>
                 <figcaption class="media-block-tools">
                   <input data-media-alt value="${escapeHtml(block.alt || "")}" aria-label="图片替代文字" placeholder="图片描述" />
@@ -420,7 +431,8 @@
 
       if (window.GlassBlogRemote?.isConfigured?.()) {
         this.assetFolderButton.classList.add("is-connected");
-        this.assetFolderButton.textContent = "云端图片";
+        this.assetFolderButton.textContent = "云端已连";
+        this.assetFolderButton.title = "图片会自动上传到 GitHub，不需要选择本地目录";
         return;
       }
 
@@ -541,6 +553,7 @@
     }
 
     setValue(markdown, legacyImages = []) {
+      this.releasePreviewUrls();
       this.blocks = parseMarkdown(markdown);
       this.appendLegacyImages(legacyImages);
       this.render();
@@ -573,6 +586,14 @@
 
     findImageBlock(id) {
       return this.blocks.find((block) => block.type === "image" && block.id === id);
+    }
+
+    releasePreviewUrls() {
+      this.blocks.forEach((block) => {
+        if (block.previewSrc?.startsWith("blob:")) {
+          URL.revokeObjectURL(block.previewSrc);
+        }
+      });
     }
 
     activeTextArea() {
@@ -804,12 +825,71 @@
       this.notifyChange();
     }
 
+    async waitForUploads() {
+      if (!this.pendingUploads.size) return;
+
+      this.onStatus(`还有 ${this.pendingUploads.size} 张图片正在上传，保存前先等它们完成...`);
+      await Promise.allSettled([...this.pendingUploads.values()]);
+
+      const failed = this.blocks.filter((block) => block.type === "image" && block.uploadState === "failed");
+      if (failed.length) {
+        throw new Error("有图片上传失败，请删除失败的图片块后重新导入。");
+      }
+
+      this.syncSource(false);
+    }
+
+    startRemoteUpload(block, file, index) {
+      const task = this.saveImageFile(file, index)
+        .then((saved) => {
+          if (!saved) throw new Error("图片没有上传成功。");
+          if (block.previewSrc?.startsWith("blob:")) {
+            URL.revokeObjectURL(block.previewSrc);
+          }
+          block.src = saved.src;
+          block.previewSrc = "";
+          block.uploadState = "done";
+          block.uploadError = "";
+          this.onStatus(`图片已上传到 ${saved.src}`);
+        })
+        .catch((error) => {
+          block.uploadState = "failed";
+          block.uploadError = error.message || "上传失败";
+          this.onStatus(`图片上传失败：${block.uploadError}`);
+        })
+        .finally(() => {
+          this.pendingUploads.delete(block.id);
+          this.render();
+          this.syncSource(true);
+        });
+
+      this.pendingUploads.set(block.id, task);
+    }
+
     async importFiles(files, target = this.getActiveTextTarget()) {
       const imageFiles = [...(files || [])].filter((file) => file.type.startsWith("image/"));
       if (!imageFiles.length) return;
 
       const ready = await this.ensureAssetFolder();
       if (!ready) return;
+
+      if (window.GlassBlogRemote?.isConfigured?.()) {
+        const imageBlocks = imageFiles.map((file) => ({
+          type: "image",
+          id: createId(),
+          src: "",
+          previewSrc: URL.createObjectURL(file),
+          uploadState: "uploading",
+          alt: cleanAlt(file.name.replace(/\.[^.]+$/, "")),
+        }));
+
+        this.insertBlocks(imageBlocks, target);
+        this.onStatus(`已插入 ${imageBlocks.length} 张图片预览，正在上传到 GitHub...`);
+        imageBlocks.forEach((block, index) => {
+          this.startRemoteUpload(block, imageFiles[index], index);
+        });
+        return;
+      }
 
       this.onStatus("正在优化并保存图片...");
 
@@ -856,6 +936,10 @@
 
     removeImage(id) {
       const before = this.blocks.length;
+      const removed = this.blocks.find((block) => block.type === "image" && block.id === id);
+      if (removed?.previewSrc?.startsWith("blob:")) {
+        URL.revokeObjectURL(removed.previewSrc);
+      }
       this.blocks = this.blocks.filter((block) => block.type !== "image" || block.id !== id);
       if (this.blocks.length === before) return;
       if (!this.blocks.some((block) => block.type === "text")) {

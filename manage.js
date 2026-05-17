@@ -513,19 +513,22 @@ async function saveSelectedPost() {
   if (window.GlassBlogRemote?.isConfigured?.()) {
     try {
       saveButton.disabled = true;
+      setStatus("正在检查图片上传状态...");
+      await mediaEditor?.waitForUploads?.();
+      const readyPost = buildManagedPost(post);
       setStatus("正在把更改发布到 GitHub...");
-      const result = await window.GlassBlogRemote.publishPost(nextPost);
+      const result = await window.GlassBlogRemote.publishPost(readyPost);
 
-      writePublishedPosts(readPublishedPosts().filter((item) => item.slug !== nextPost.slug));
-      writeHiddenPosts(readHiddenPosts().filter((slug) => slug !== nextPost.slug));
-      staticPostsCache = staticPostsCache.filter((item) => item.slug !== nextPost.slug);
-      staticPostsCache.push(normalizePost({ ...result.post, content: nextPost.content }, "static"));
+      writePublishedPosts(readPublishedPosts().filter((item) => item.slug !== readyPost.slug));
+      writeHiddenPosts(readHiddenPosts().filter((slug) => slug !== readyPost.slug));
+      staticPostsCache = staticPostsCache.filter((item) => item.slug !== readyPost.slug);
+      staticPostsCache.push(normalizePost({ ...result.post, content: readyPost.content }, "static"));
       posts = mergePosts(staticPostsCache, loadLocalPosts());
-      selectedSlug = nextPost.slug;
+      selectedSlug = readyPost.slug;
       updateCategoryOptions();
       renderList();
       showEditor(selectedPost());
-      setStatus(`文章《${nextPost.title}》已保存到 GitHub。提交 ${String(result.commit || "").slice(0, 7)}，稍后线上刷新。`);
+      setStatus(`文章《${readyPost.title}》已保存到 GitHub。提交 ${String(result.commit || "").slice(0, 7)}，稍后线上刷新。`);
     } catch (error) {
       setStatus(error.message || "保存到 GitHub 失败。");
     } finally {

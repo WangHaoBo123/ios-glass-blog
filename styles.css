@@ -2359,6 +2359,7 @@ h1 {
 }
 
 .media-block-frame {
+  position: relative;
   background: rgba(0, 0, 0, 0.16);
 }
 
@@ -2367,6 +2368,38 @@ h1 {
   width: 100%;
   max-height: 520px;
   object-fit: cover;
+}
+
+.media-block-status {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 12px;
+  font-weight: 800;
+  background: rgba(17, 18, 20, 0.56);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(16px) saturate(130%);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+}
+
+.media-block.is-uploading .media-block-status {
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.media-block.is-failed {
+  border-color: rgba(255, 120, 120, 0.42);
+}
+
+.media-block.is-failed .media-block-status {
+  color: #ffe2e2;
+  background: rgba(110, 30, 30, 0.62);
 }
 
 .media-block-tools {

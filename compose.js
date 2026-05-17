@@ -607,9 +607,12 @@ async function publishCurrentPost() {
   if (window.GlassBlogRemote?.isConfigured?.()) {
     try {
       publishPostButton.disabled = true;
+      setStatus("正在检查图片上传状态...");
+      await mediaEditor?.waitForUploads?.();
+      const readyDraft = getDraft();
       setStatus("正在发布到 GitHub，GitHub Pages 稍后会自动刷新...");
-      const result = await window.GlassBlogRemote.publishPost(draft);
-      writeHiddenPosts(readHiddenPosts().filter((slug) => slug !== draft.slug));
+      const result = await window.GlassBlogRemote.publishPost(readyDraft);
+      writeHiddenPosts(readHiddenPosts().filter((slug) => slug !== readyDraft.slug));
 
       if (currentDraftId) {
         writeSavedDrafts(readSavedDrafts().filter((item) => item.id !== currentDraftId));
@@ -617,9 +620,9 @@ async function publishCurrentPost() {
         renderSavedDrafts();
       }
 
-      updatePublishState({ ...draft, publishedAt: new Date().toISOString() });
+      updatePublishState({ ...readyDraft, publishedAt: new Date().toISOString() });
       setAutosaveState();
-      setStatus(`文章《${draft.title}》已发布到 GitHub。提交 ${String(result.commit || "").slice(0, 7)}，等 Pages 部署完成后线上可见。`);
+      setStatus(`文章《${readyDraft.title}》已发布到 GitHub。提交 ${String(result.commit || "").slice(0, 7)}，等 Pages 部署完成后线上可见。`);
     } catch (error) {
       setStatus(error.message || "发布到 GitHub 失败。");
     } finally {
