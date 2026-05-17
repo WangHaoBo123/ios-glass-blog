@@ -17,13 +17,18 @@
     <meta property="og:url" content="https://starytra32.top/" />
     <title>灰玻璃日记</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=20260517-filter-motion" />
+    <link rel="stylesheet" href="./styles.css?v=20260517-intro-typewriter" />
     <noscript>
       <style>
-        .script-hero-title.is-writing-pending span {
+        .script-hero-title.is-writing-pending span,
+        .intro-text.is-typing-pending {
           color: rgba(255, 255, 255, 0.96);
           clip-path: none;
           text-shadow: 0 0 22px rgba(255, 255, 255, 0.08), 0 10px 34px rgba(0, 0, 0, 0.18);
+        }
+
+        .intro-text.is-typing-pending::before {
+          content: attr(data-typing-text);
         }
       </style>
     </noscript>
@@ -84,9 +89,8 @@
           <h1 id="site-title" class="script-hero-title is-writing-pending" data-script-hero-title aria-label="Live softly, think clearly, write slowly.">
             <span aria-hidden="true">Live softly, think clearly, write slowly.</span>
           </h1>
-          <p class="intro-text">
-            在一层灰色玻璃之后，存放技术、生活和偶尔清醒的片刻；文字轻一点，
-            结构稳一点，慢慢写，也慢慢留下。
+          <p class="intro-text is-typing-pending" data-typing-intro data-typing-text="在一层灰色玻璃之后，存放技术、生活和偶尔清醒的片刻；文字轻一点，结构稳一点，慢慢写，也慢慢留下。" aria-label="在一层灰色玻璃之后，存放技术、生活和偶尔清醒的片刻；文字轻一点，结构稳一点，慢慢写，也慢慢留下。">
+            <span data-typing-output aria-hidden="true"></span><span class="typing-caret" aria-hidden="true"></span>
           </p>
         </div>
 
@@ -185,12 +189,12 @@
       <p data-image-preview-caption></p>
     </div>
 
-    <script src="./site-config.js?v=20260517-filter-motion"></script>
-    <script src="./remote-api.js?v=20260517-filter-motion"></script>
-    <script src="./auth.js?v=20260517-filter-motion"></script>
-    <script src="./opening.js?v=20260517-filter-motion"></script>
-    <script src="./page-transition.js?v=20260517-filter-motion"></script>
-    <script src="./cursor-trail.js?v=20260517-filter-motion"></script>
-    <script src="./script.js?v=20260517-filter-motion"></script>
+    <script src="./site-config.js?v=20260517-intro-typewriter"></script>
+    <script src="./remote-api.js?v=20260517-intro-typewriter"></script>
+    <script src="./auth.js?v=20260517-intro-typewriter"></script>
+    <script src="./opening.js?v=20260517-intro-typewriter"></script>
+    <script src="./page-transition.js?v=20260517-intro-typewriter"></script>
+    <script src="./cursor-trail.js?v=20260517-intro-typewriter"></script>
+    <script src="./script.js?v=20260517-intro-typewriter"></script>
   </body>
 </html>

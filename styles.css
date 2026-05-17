@@ -1076,10 +1076,44 @@ h1 {
 
 .intro-text {
   max-width: 660px;
+  min-height: calc(18px * 1.9 * 2);
   margin-bottom: 0;
   color: var(--muted-strong);
   font-size: 18px;
   line-height: 1.9;
+}
+
+.intro-text.is-typing-pending {
+  color: transparent;
+}
+
+.intro-text.is-typing-pending .typing-caret,
+.intro-text.is-typed .typing-caret {
+  opacity: 0;
+}
+
+.typing-caret {
+  display: inline-block;
+  width: 0.08em;
+  height: 1.12em;
+  margin-left: 0.12em;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.68);
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.16);
+  vertical-align: -0.16em;
+  animation: intro-caret-blink 820ms steps(1, end) infinite;
+}
+
+@keyframes intro-caret-blink {
+  0%,
+  44% {
+    opacity: 1;
+  }
+
+  45%,
+  100% {
+    opacity: 0.18;
+  }
 }
 
 .status-panel {

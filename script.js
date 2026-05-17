@@ -36,6 +36,8 @@ const ambientBarA = document.querySelector('[data-ambient-bar="a"]');
 const ambientBarB = document.querySelector('[data-ambient-bar="b"]');
 const profileName = document.querySelector(".profile-copy strong");
 const scriptHeroTitle = document.querySelector("[data-script-hero-title]");
+const typingIntro = document.querySelector("[data-typing-intro]");
+const typingIntroOutput = document.querySelector("[data-typing-output]");
 
 const categoryLabels = {
   tech: "技术",
@@ -116,21 +118,66 @@ let posts = [];
 let activeFilter = "all";
 let activeProgressFrame = 0;
 let listTransitionTimer = 0;
+let typingIntroFrame = 0;
+const heroWritingDuration = 3200;
+
+function revealTypingIntroText() {
+  if (!typingIntro || !typingIntroOutput) return;
+
+  typingIntroOutput.textContent = typingIntro.dataset.typingText || "";
+  typingIntro.classList.remove("is-typing-pending", "is-typing");
+  typingIntro.classList.add("is-typed");
+}
+
+function playTypingIntro() {
+  if (!typingIntro || !typingIntroOutput) return;
+
+  const text = typingIntro.dataset.typingText || "";
+  const characters = [...text];
+  const startedAt = performance.now();
+
+  window.cancelAnimationFrame(typingIntroFrame);
+  typingIntroOutput.textContent = "";
+  typingIntro.classList.remove("is-typing-pending", "is-typed");
+  typingIntro.classList.add("is-typing");
+
+  const typeFrame = (now) => {
+    const progress = Math.min((now - startedAt) / heroWritingDuration, 1);
+    const visibleCount = Math.floor(progress * characters.length);
+    typingIntroOutput.textContent = characters.slice(0, visibleCount).join("");
+
+    if (progress < 1) {
+      typingIntroFrame = window.requestAnimationFrame(typeFrame);
+      return;
+    }
+
+    revealTypingIntroText();
+  };
+
+  typingIntroFrame = window.requestAnimationFrame(typeFrame);
+}
 
 function playScriptHeroWriting() {
-  if (!scriptHeroTitle) return;
+  if (!scriptHeroTitle && !typingIntro) return;
 
-  scriptHeroTitle.classList.remove("is-writing-pending");
+  scriptHeroTitle?.classList.remove("is-writing-pending");
 
-  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+    revealTypingIntroText();
+    return;
+  }
 
-  scriptHeroTitle.classList.remove("is-writing");
-  void scriptHeroTitle.offsetWidth;
-  scriptHeroTitle.classList.add("is-writing");
+  if (scriptHeroTitle) {
+    scriptHeroTitle.classList.remove("is-writing");
+    void scriptHeroTitle.offsetWidth;
+    scriptHeroTitle.classList.add("is-writing");
+  }
+
+  playTypingIntro();
 }
 
 function queueScriptHeroWriting() {
-  if (!scriptHeroTitle) return;
+  if (!scriptHeroTitle && !typingIntro) return;
 
   const start = () => {
     window.setTimeout(playScriptHeroWriting, 35);
