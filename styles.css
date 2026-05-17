@@ -1388,7 +1388,7 @@ h1 {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .reader-toc-title {
@@ -1398,44 +1398,37 @@ h1 {
   text-transform: uppercase;
 }
 
-.reading-progress-ring {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 46px;
-  height: 46px;
-  color: rgba(255, 255, 255, 0.86);
+.reading-progress-bar {
+  height: 5px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
 }
 
-.reading-progress-ring svg {
-  position: absolute;
-  inset: 0;
+.reading-progress-bar span {
+  display: block;
   width: 100%;
   height: 100%;
-  transform: rotate(-90deg);
+  transform: scaleX(0);
+  transform-origin: left center;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.82)),
+    rgba(255, 255, 255, 0.28);
+  border-radius: inherit;
+  transition: transform 160ms ease;
 }
 
-.reading-progress-ring circle {
-  fill: none;
-  stroke-width: 2.6;
+.reading-progress-copy {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 12px;
 }
 
-.progress-ring-track {
-  stroke: rgba(255, 255, 255, 0.12);
-}
-
-.progress-ring-value {
-  stroke: rgba(255, 255, 255, 0.78);
-  stroke-dasharray: 100;
-  stroke-dashoffset: 100;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 160ms ease;
-}
-
-.reading-progress-ring span {
-  font-size: 11px;
+.reading-progress-copy span {
+  color: var(--muted-strong);
   font-weight: 800;
-  letter-spacing: 0;
 }
 
 .toc-list {

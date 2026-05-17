@@ -530,14 +530,11 @@ function renderReaderToc() {
   readerToc.innerHTML = `
     <div class="reader-toc-head">
       <p class="reader-toc-title">目录</p>
-      <div class="reading-progress-ring" aria-label="阅读进度">
-        <svg viewBox="0 0 40 40" aria-hidden="true">
-          <circle class="progress-ring-track" cx="20" cy="20" r="16"></circle>
-          <circle class="progress-ring-value" cx="20" cy="20" r="16" data-reading-progress-ring></circle>
-        </svg>
-        <span data-reading-progress-text>0%</span>
-      </div>
     </div>
+    <div class="reading-progress-bar" aria-label="阅读进度">
+      <span data-reading-progress-bar></span>
+    </div>
+    <p class="reading-progress-copy">阅读进度 <span data-reading-progress-text>0%</span></p>
     <nav class="toc-list" aria-label="文章标题导航">
       ${headings
         .map(
@@ -872,11 +869,11 @@ function readingProgressValue() {
 
 function updateReadingProgress() {
   const progress = readingProgressValue();
-  const ring = readerToc?.querySelector("[data-reading-progress-ring]");
+  const bar = readerToc?.querySelector("[data-reading-progress-bar]");
   const text = readerToc?.querySelector("[data-reading-progress-text]");
 
-  if (ring) {
-    ring.style.strokeDashoffset = String(100 - progress * 100);
+  if (bar) {
+    bar.style.transform = `scaleX(${progress})`;
   }
 
   if (text) {
