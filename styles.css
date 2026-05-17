@@ -419,6 +419,7 @@ body.is-previewing-image {
 .ambient-bar {
   position: absolute;
   display: block;
+  overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.4);
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.24), rgba(98, 105, 116, 0.11)),
@@ -429,6 +430,46 @@ body.is-previewing-image {
   backdrop-filter: blur(14px) saturate(120%);
   -webkit-backdrop-filter: blur(14px) saturate(120%);
   will-change: transform;
+}
+
+.ambient-bar::before,
+.ambient-bar::after {
+  position: absolute;
+  inset: -28% -54%;
+  pointer-events: none;
+  content: "";
+  opacity: 0;
+  mix-blend-mode: screen;
+  transform: translate3d(-72%, 18%, 0) rotate(16deg);
+}
+
+.ambient-bar::before {
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0 42%,
+      rgba(255, 255, 255, 0.04) 47%,
+      rgba(255, 255, 255, 0.26) 50%,
+      rgba(255, 255, 255, 0.05) 54%,
+      transparent 60% 100%
+    );
+  filter: blur(8px);
+  animation: glass-glow-sweep 18s ease-in-out infinite;
+}
+
+.ambient-bar::after {
+  inset: -42% -68%;
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0 46%,
+      rgba(255, 255, 255, 0.08) 49%,
+      rgba(255, 255, 255, 0.18) 50%,
+      rgba(255, 255, 255, 0.04) 53%,
+      transparent 58% 100%
+    );
+  filter: blur(18px);
+  animation: glass-glow-sweep-soft 24s ease-in-out infinite;
 }
 
 .ambient-bar-a {
@@ -445,6 +486,68 @@ body.is-previewing-image {
   left: -14vw;
   bottom: 4vh;
   transform: translate3d(0, 0, 0) rotate(-13deg) skewX(10deg);
+}
+
+.ambient-bar-a::before {
+  animation-delay: -4s;
+}
+
+.ambient-bar-a::after {
+  animation-delay: -11s;
+}
+
+.ambient-bar-b::before {
+  animation-delay: -12s;
+  animation-duration: 22s;
+}
+
+.ambient-bar-b::after {
+  animation-delay: -2s;
+  animation-duration: 28s;
+}
+
+@keyframes glass-glow-sweep {
+  0%,
+  52% {
+    opacity: 0;
+    transform: translate3d(-76%, 16%, 0) rotate(16deg);
+  }
+
+  62% {
+    opacity: 0.52;
+  }
+
+  76% {
+    opacity: 0.18;
+  }
+
+  84%,
+  100% {
+    opacity: 0;
+    transform: translate3d(76%, -16%, 0) rotate(16deg);
+  }
+}
+
+@keyframes glass-glow-sweep-soft {
+  0%,
+  58% {
+    opacity: 0;
+    transform: translate3d(-64%, -10%, 0) rotate(-10deg);
+  }
+
+  68% {
+    opacity: 0.34;
+  }
+
+  80% {
+    opacity: 0.12;
+  }
+
+  88%,
+  100% {
+    opacity: 0;
+    transform: translate3d(68%, 12%, 0) rotate(-10deg);
+  }
 }
 
 @keyframes ambient-haze {
@@ -3863,6 +3966,12 @@ h1 {
   .ambient-bar-b {
     animation-duration: 32s !important;
     animation-iteration-count: infinite !important;
+  }
+
+  .ambient-bar::before,
+  .ambient-bar::after {
+    animation: none !important;
+    opacity: 0 !important;
   }
 
   .status-panel::before,
