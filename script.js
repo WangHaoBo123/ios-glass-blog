@@ -132,7 +132,7 @@ function queueScriptHeroWriting() {
   if (!scriptHeroTitle) return;
 
   const start = () => {
-    window.setTimeout(playScriptHeroWriting, 120);
+    window.setTimeout(playScriptHeroWriting, 35);
   };
 
   if (window.GlassBlogOpening?.isPlaying) {
