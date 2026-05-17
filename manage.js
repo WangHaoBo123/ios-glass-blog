@@ -29,7 +29,7 @@ const imageInput = document.querySelector("[data-manage-image-input]");
 const mediaFlow = document.querySelector("[data-manage-media-flow]");
 const editorCanvas = document.querySelector("[data-manage-editor-canvas]");
 const markdownButtons = [...document.querySelectorAll("[data-manage-md]")];
-const highlightColorInput = document.querySelector("[data-manage-highlight-color]");
+const highlightColorButtons = [...document.querySelectorAll("[data-manage-highlight-color]")];
 const emojiToggleButton = document.querySelector("[data-manage-emoji-toggle]");
 const ambient = document.querySelector("[data-ambient]");
 const ambientBarA = document.querySelector('[data-ambient-bar="a"]');
@@ -114,6 +114,7 @@ let staticPostsCache = [];
 let selectedSlug = "";
 let mediaEditor = null;
 let legacyImages = [];
+let activeHighlightColor = highlightColorButtons.find((button) => button.classList.contains("is-active"))?.dataset.manageHighlightColor || "#ffd966";
 const emojiGroups = [
   { label: "常用", items: ["😊", "😂", "🤣", "😍", "🥰", "😎", "😭", "😅", "👍", "👏", "🙏", "💪"] },
   { label: "心情", items: ["✨", "🌙", "☕", "🍃", "🔥", "💡", "📌", "✅", "⚠️", "🎯", "📝", "📚"] },
@@ -377,7 +378,7 @@ function insertMarkdown(command) {
     h4: () => setHeading(4),
     bold: () => toggleWrap("**", "**", "加粗文字"),
     italic: () => toggleWrap("*", "*", "斜体文字"),
-    highlight: () => mediaEditor?.applyHighlight(cleanHighlightColor(highlightColorInput?.value), "重点文字"),
+    highlight: () => mediaEditor?.applyHighlight(cleanHighlightColor(activeHighlightColor), "重点文字"),
     quote: () => setLinePrefix("> ", /^\s{0,3}>\s?/, "引用内容"),
     list: () => setLinePrefix("- ", /^\s{0,3}[-*+]\s+/, "列表项"),
     codeblock: () => wrapSelection("```\n", "\n```", "console.log(\"hello blog\");"),
@@ -734,6 +735,13 @@ managerList?.addEventListener("click", (event) => {
 markdownButtons.forEach((button) => {
   button.addEventListener("click", () => {
     insertMarkdown(button.dataset.manageMd);
+  });
+});
+highlightColorButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    activeHighlightColor = cleanHighlightColor(button.dataset.manageHighlightColor);
+    highlightColorButtons.forEach((item) => item.classList.toggle("is-active", item === button));
+    setStatus("已切换荧光笔颜色");
   });
 });
 emojiToggleButton?.addEventListener("click", (event) => {

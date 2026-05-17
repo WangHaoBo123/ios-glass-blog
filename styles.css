@@ -2999,7 +2999,7 @@ h1 {
 .highlight-tool {
   display: grid;
   grid-column: 1 / -1;
-  grid-template-columns: minmax(0, 1fr) 34px;
+  grid-template-columns: 38px minmax(0, 1fr);
   align-items: center;
   width: 100%;
   gap: 5px;
@@ -3030,23 +3030,46 @@ h1 {
   z-index: -1;
 }
 
-.highlight-tool input[type="color"] {
-  width: 34px;
-  height: 30px;
-  padding: 3px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 7px;
-  background: rgba(0, 0, 0, 0.22);
-  cursor: pointer;
+.highlight-swatches {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
 }
 
-.highlight-tool input[type="color"]::-webkit-color-swatch-wrapper {
+.highlight-swatches button {
+  position: relative;
+  min-width: 0;
+  width: 100%;
+  height: 16px;
   padding: 0;
+  overflow: visible;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 999px 8px 999px 10px;
+  background:
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent),
+    var(--swatch);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    0 6px 14px color-mix(in srgb, var(--swatch) 30%, transparent);
+  transform: rotate(-2deg);
 }
 
-.highlight-tool input[type="color"]::-webkit-color-swatch {
-  border: 0;
-  border-radius: 5px;
+.highlight-swatches button:nth-child(even) {
+  transform: rotate(2deg);
+}
+
+.highlight-swatches button:hover,
+.highlight-swatches button.is-active {
+  border-color: rgba(255, 255, 255, 0.5);
+  filter: brightness(1.07);
+}
+
+.highlight-swatches button.is-active::after {
+  position: absolute;
+  inset: -4px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: inherit;
+  content: "";
 }
 
 .emoji-panel {
@@ -3998,9 +4021,8 @@ h1 {
     width: auto;
   }
 
-  .highlight-tool input[type="color"] {
-    width: 30px;
-    height: 30px;
+  .highlight-swatches {
+    width: 86px;
   }
 
   .compose-preview {

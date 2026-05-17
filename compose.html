@@ -8,7 +8,7 @@
     <meta name="robots" content="noindex, nofollow" />
     <title>写作 - 灰玻璃日记</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=20260517-emoji-tool" />
+    <link rel="stylesheet" href="./styles.css?v=20260517-highlight-swatches" />
   </head>
   <body>
     <a class="skip-link" href="#content">跳到正文</a>
@@ -76,7 +76,14 @@
           <button type="button" data-md="italic" data-tooltip="斜体选中文字" data-shortcut="Ctrl+I" aria-label="斜体选中文字">I</button>
           <span class="highlight-tool" aria-label="荧光笔标记">
             <button class="highlight-button" type="button" data-md="highlight" data-tooltip="荧光笔标记" data-shortcut="Ctrl+Shift+H" aria-label="荧光笔标记选中文字">H</button>
-            <input data-highlight-color type="color" value="#ffd966" title="选择荧光笔颜色" aria-label="选择荧光笔颜色" />
+            <span class="highlight-swatches" data-highlight-swatches aria-label="选择荧光笔颜色">
+              <button class="is-active" type="button" data-highlight-color="#ffd966" style="--swatch: #ffd966;" aria-label="暖黄荧光笔"></button>
+              <button type="button" data-highlight-color="#ffb3c7" style="--swatch: #ffb3c7;" aria-label="雾粉荧光笔"></button>
+              <button type="button" data-highlight-color="#9be7c7" style="--swatch: #9be7c7;" aria-label="薄荷荧光笔"></button>
+              <button type="button" data-highlight-color="#9fd8ff" style="--swatch: #9fd8ff;" aria-label="冰蓝荧光笔"></button>
+              <button type="button" data-highlight-color="#c8b8ff" style="--swatch: #c8b8ff;" aria-label="淡紫荧光笔"></button>
+              <button type="button" data-highlight-color="#f2f3f5" style="--swatch: #f2f3f5;" aria-label="银白荧光笔"></button>
+            </span>
           </span>
           <button type="button" data-md="quote" data-tooltip="引用段落" data-shortcut="Ctrl+Alt+Q" aria-label="引用段落">“”</button>
           <button type="button" data-md="list" data-tooltip="项目列表" data-shortcut="Ctrl+Alt+L" aria-label="项目列表">•</button>
@@ -253,6 +260,6 @@
     <script src="./cursor-trail.js"></script>
     <script src="./media-editor.js"></script>
     <script src="./backup.js"></script>
-    <script src="./compose.js?v=20260517-emoji-tool"></script>
+    <script src="./compose.js?v=20260517-highlight-swatches"></script>
   </body>
 </html>

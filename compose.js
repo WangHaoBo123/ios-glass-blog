@@ -42,7 +42,7 @@ const checkTags = document.querySelector("[data-check-tags]");
 const viewButtons = [...document.querySelectorAll("[data-editor-view]")];
 const viewPanels = [...document.querySelectorAll("[data-view-panel]")];
 const markdownButtons = [...document.querySelectorAll("[data-md]")];
-const highlightColorInput = document.querySelector("[data-highlight-color]");
+const highlightColorButtons = [...document.querySelectorAll("[data-highlight-color]")];
 const emojiToggleButton = document.querySelector("[data-emoji-toggle]");
 const ambient = document.querySelector("[data-ambient]");
 const ambientBarA = document.querySelector('[data-ambient-bar="a"]');
@@ -63,6 +63,7 @@ let currentDraftId = localStorage.getItem(currentDraftIdKey) || "";
 let mediaEditor = null;
 let legacyImages = [];
 let updateTimer = 0;
+let activeHighlightColor = highlightColorButtons.find((button) => button.classList.contains("is-active"))?.dataset.highlightColor || "#ffd966";
 const emojiGroups = [
   { label: "常用", items: ["😊", "😂", "🤣", "😍", "🥰", "😎", "😭", "😅", "👍", "👏", "🙏", "💪"] },
   { label: "心情", items: ["✨", "🌙", "☕", "🍃", "🔥", "💡", "📌", "✅", "⚠️", "🎯", "📝", "📚"] },
@@ -750,7 +751,7 @@ function insertMarkdown(command) {
     bold: () => toggleWrap("**", "**", "加粗文字"),
     italic: () => toggleWrap("*", "*", "斜体文字"),
     highlight: () => {
-      mediaEditor?.applyHighlight(cleanHighlightColor(highlightColorInput?.value), "重点文字");
+      mediaEditor?.applyHighlight(cleanHighlightColor(activeHighlightColor), "重点文字");
       scheduleUpdate();
     },
     quote: () => setLinePrefix("> ", /^\s{0,3}>\s?/, "引用内容"),
@@ -976,6 +977,13 @@ viewButtons.forEach((button) => {
 markdownButtons.forEach((button) => {
   button.addEventListener("click", () => {
     insertMarkdown(button.dataset.md);
+  });
+});
+highlightColorButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    activeHighlightColor = cleanHighlightColor(button.dataset.highlightColor);
+    highlightColorButtons.forEach((item) => item.classList.toggle("is-active", item === button));
+    setStatus("已切换荧光笔颜色");
   });
 });
 emojiToggleButton?.addEventListener("click", (event) => {
