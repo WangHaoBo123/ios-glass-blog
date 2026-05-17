@@ -958,60 +958,6 @@ h1 {
   animation: panel-float-main 8s ease-in-out infinite alternate;
 }
 
-.post-cover-mark {
-  position: absolute;
-  right: clamp(24px, 4.8vw, 58px);
-  bottom: clamp(22px, 4vw, 46px);
-  z-index: 0;
-  width: min(32%, 210px);
-  aspect-ratio: 1.45;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 8px;
-  background:
-    radial-gradient(circle at var(--cover-glow-x) var(--cover-glow-y), rgba(255, 255, 255, 0.28), transparent 34%),
-    linear-gradient(135deg, hsl(210 8% var(--cover-silver) / 0.3), hsl(220 6% var(--cover-glass) / 0.2) 48%, hsl(220 8% var(--cover-ink) / 0.56)),
-    rgba(255, 255, 255, 0.045);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 22px 46px rgba(0, 0, 0, 0.22);
-  transform: rotate(var(--cover-tilt));
-  backdrop-filter: blur(18px) saturate(126%);
-  -webkit-backdrop-filter: blur(18px) saturate(126%);
-}
-
-.post-cover-mark::before,
-.post-cover-mark span {
-  position: absolute;
-  content: "";
-  pointer-events: none;
-}
-
-.post-cover-mark::before {
-  inset: 12% -18%;
-  background:
-    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent),
-    linear-gradient(0deg, transparent 42%, rgba(255, 255, 255, 0.1) 43%, transparent 45%);
-  transform: rotate(-11deg);
-}
-
-.post-cover-mark span {
-  left: 14%;
-  right: 16%;
-  bottom: 18%;
-  height: 9px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.34);
-  filter: blur(0.2px);
-}
-
-.post-cover-mark.is-compact {
-  right: 18px;
-  bottom: 18px;
-  width: 92px;
-  opacity: 0.76;
-}
-
 @keyframes panel-float-main {
   0% {
     transform: translate3d(0, 0, 0);
@@ -3290,17 +3236,6 @@ h1 {
     min-height: 0;
   }
 
-  .featured-post .post-cover-mark {
-    position: relative;
-    right: auto;
-    bottom: auto;
-    grid-column: 1;
-    grid-row: auto;
-    width: min(100%, 180px);
-    margin-left: auto;
-    order: -1;
-  }
-
   .featured-post .tag-list,
   .featured-post .post-actions {
     grid-column: 1;
@@ -3434,12 +3369,6 @@ h1 {
 
   .post-card {
     min-height: 190px;
-  }
-
-  .post-cover-mark.is-compact {
-    width: 76px;
-    right: 12px;
-    bottom: 12px;
   }
 
   .section-heading h2 {

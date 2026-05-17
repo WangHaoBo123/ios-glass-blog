@@ -458,33 +458,6 @@ function renderTagList(tags) {
   return tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("");
 }
 
-function postAccentStyle(post) {
-  const seed = [...String(post.slug || post.title || "post")].reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const tilt = (seed % 28) - 14;
-  const glowX = 18 + (seed % 58);
-  const glowY = 18 + ((seed * 7) % 54);
-  const ink = 18 + (seed % 18);
-  const silver = 92 + (seed % 18);
-  const glass = 30 + (seed % 12);
-
-  return [
-    `--cover-tilt: ${tilt}deg`,
-    `--cover-glow-x: ${glowX}%`,
-    `--cover-glow-y: ${glowY}%`,
-    `--cover-ink: ${ink}%`,
-    `--cover-silver: ${silver}%`,
-    `--cover-glass: ${glass}%`,
-  ].join("; ");
-}
-
-function postCoverMarkup(post, compact = false) {
-  return `
-    <span class="post-cover-mark${compact ? " is-compact" : ""}" style="${postAccentStyle(post)}" aria-hidden="true">
-      <span></span>
-    </span>
-  `;
-}
-
 function postLink(post, className = "") {
   return `
     <a class="${className}" href="#post/${encodeURIComponent(post.slug)}">
@@ -573,7 +546,6 @@ function renderFeatured(post) {
     ? `<a class="manage-link" href="./manage.html#post/${encodeURIComponent(post.slug)}">管理</a>`
     : "";
   featuredPost.innerHTML = `
-    ${postCoverMarkup(post)}
     <div class="post-meta">${renderMeta(post)}</div>
     <h2>${escapeHtml(post.title)}</h2>
     <p>${escapeHtml(post.summary)}</p>
@@ -593,7 +565,6 @@ function renderPostCard(post) {
   return `
     <article class="post-card">
       <a class="post-card-link" href="#post/${encodeURIComponent(post.slug)}">
-        ${postCoverMarkup(post, true)}
         <div class="post-meta">${renderMeta(post)}</div>
         <h3>${escapeHtml(post.title)}</h3>
         <p>${escapeHtml(post.summary)}</p>
