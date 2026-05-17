@@ -17,7 +17,16 @@
     <meta property="og:url" content="https://starytra32.top/" />
     <title>灰玻璃日记</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=20260517-glass-polish-v2" />
+    <link rel="stylesheet" href="./styles.css?v=20260517-script-writing" />
+    <noscript>
+      <style>
+        .script-hero-title.is-writing-pending span {
+          color: rgba(255, 255, 255, 0.96);
+          clip-path: none;
+          text-shadow: 0 0 22px rgba(255, 255, 255, 0.08), 0 10px 34px rgba(0, 0, 0, 0.18);
+        }
+      </style>
+    </noscript>
   </head>
   <body>
     <a class="skip-link" href="#content">跳到正文</a>
@@ -72,7 +81,9 @@
       <section class="intro-grid" aria-labelledby="site-title" data-list-view hidden>
         <div class="intro-copy">
           <p class="kicker">Personal weblog</p>
-          <h1 id="site-title" class="script-hero-title">Live softly, think clearly, write slowly.</h1>
+          <h1 id="site-title" class="script-hero-title is-writing-pending" data-script-hero-title aria-label="Live softly, think clearly, write slowly.">
+            <span aria-hidden="true">Live softly, think clearly, write slowly.</span>
+          </h1>
           <p class="intro-text">
             在一层灰色玻璃之后，存放技术、生活和偶尔清醒的片刻；文字轻一点，
             结构稳一点，慢慢写，也慢慢留下。
@@ -174,12 +185,12 @@
       <p data-image-preview-caption></p>
     </div>
 
-    <script src="./site-config.js?v=20260517-glass-polish-v2"></script>
-    <script src="./remote-api.js?v=20260517-glass-polish-v2"></script>
-    <script src="./auth.js?v=20260517-glass-polish-v2"></script>
-    <script src="./opening.js?v=20260517-glass-polish-v2"></script>
-    <script src="./page-transition.js?v=20260517-glass-polish-v2"></script>
-    <script src="./cursor-trail.js?v=20260517-glass-polish-v2"></script>
-    <script src="./script.js?v=20260517-glass-polish-v2"></script>
+    <script src="./site-config.js?v=20260517-script-writing"></script>
+    <script src="./remote-api.js?v=20260517-script-writing"></script>
+    <script src="./auth.js?v=20260517-script-writing"></script>
+    <script src="./opening.js?v=20260517-script-writing"></script>
+    <script src="./page-transition.js?v=20260517-script-writing"></script>
+    <script src="./cursor-trail.js?v=20260517-script-writing"></script>
+    <script src="./script.js?v=20260517-script-writing"></script>
   </body>
 </html>

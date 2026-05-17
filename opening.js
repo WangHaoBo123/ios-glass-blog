@@ -1,4 +1,11 @@
 (function () {
+  const openingState = {
+    isPlaying: false,
+    done: Promise.resolve(false),
+  };
+
+  window.GlassBlogOpening = openingState;
+
   function sameSiteReferrer() {
     if (!document.referrer) return false;
 
@@ -34,6 +41,15 @@
       <h2>Thoughts, projects, and quiet notes behind a frosted pane.</h2>
     </div>
   `;
+
+  openingState.isPlaying = true;
+  openingState.done = new Promise((resolve) => {
+    window.setTimeout(() => {
+      openingState.isPlaying = false;
+      document.dispatchEvent(new CustomEvent("glassblog:opening-ended"));
+      resolve(true);
+    }, 4300);
+  });
 
   document.body.append(overlay);
   document.body.classList.add("opening-active");

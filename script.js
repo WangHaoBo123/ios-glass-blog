@@ -35,6 +35,7 @@ const ambient = document.querySelector("[data-ambient]");
 const ambientBarA = document.querySelector('[data-ambient-bar="a"]');
 const ambientBarB = document.querySelector('[data-ambient-bar="b"]');
 const profileName = document.querySelector(".profile-copy strong");
+const scriptHeroTitle = document.querySelector("[data-script-hero-title]");
 
 const categoryLabels = {
   tech: "技术",
@@ -114,6 +115,33 @@ const fallbackPosts = [
 let posts = [];
 let activeFilter = "all";
 let activeProgressFrame = 0;
+
+function playScriptHeroWriting() {
+  if (!scriptHeroTitle) return;
+
+  scriptHeroTitle.classList.remove("is-writing-pending");
+
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+
+  scriptHeroTitle.classList.remove("is-writing");
+  void scriptHeroTitle.offsetWidth;
+  scriptHeroTitle.classList.add("is-writing");
+}
+
+function queueScriptHeroWriting() {
+  if (!scriptHeroTitle) return;
+
+  const start = () => {
+    window.setTimeout(playScriptHeroWriting, 120);
+  };
+
+  if (window.GlassBlogOpening?.isPlaying) {
+    window.GlassBlogOpening.done?.then(start);
+    return;
+  }
+
+  start();
+}
 
 function authorIsSignedIn() {
   return window.GlassBlogAuth?.isSignedIn?.() === true;
@@ -764,6 +792,7 @@ function showListView() {
   if (tagsView) tagsView.hidden = true;
   renderList();
   updatePageMeta(siteTitle, siteDescription, "./index.html#articles");
+  queueScriptHeroWriting();
 }
 
 function hideListView() {
