@@ -99,9 +99,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.26) 0 24%, rgba(255, 255, 255, 0.1) 29%, transparent 33%),
-    linear-gradient(106deg, transparent 0 17%, rgba(123, 128, 136, 0.08) 18%, rgba(123, 128, 136, 0.16) 19% 32%, rgba(123, 128, 136, 0.06) 33%, transparent 35% 57%, rgba(255, 255, 255, 0.08) 58%, rgba(255, 255, 255, 0.22) 59% 70%, rgba(255, 255, 255, 0.07) 71%, transparent 73%),
-    linear-gradient(24deg, transparent 0 41%, rgba(83, 88, 96, 0.06) 42%, rgba(83, 88, 96, 0.12) 43% 56%, rgba(83, 88, 96, 0.05) 57%, transparent 59%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0 24%, rgba(255, 255, 255, 0.12) 28%, transparent 31%),
+    linear-gradient(106deg, transparent 0 16%, rgba(123, 128, 136, 0.11) 17%, rgba(123, 128, 136, 0.23) 18% 33%, rgba(123, 128, 136, 0.1) 34%, transparent 35% 56%, rgba(255, 255, 255, 0.12) 57%, rgba(255, 255, 255, 0.3) 58% 71%, rgba(255, 255, 255, 0.11) 72%, transparent 73%),
+    linear-gradient(24deg, transparent 0 40%, rgba(83, 88, 96, 0.08) 41%, rgba(83, 88, 96, 0.17) 42% 57%, rgba(83, 88, 96, 0.07) 58%, transparent 59%),
     linear-gradient(180deg, var(--bg-soft), var(--bg));
   background-position:
     0 0,
@@ -394,9 +394,9 @@ input:focus-visible {
   z-index: 0;
   pointer-events: none;
   background:
-    linear-gradient(116deg, transparent 0 21%, rgba(255, 255, 255, 0.06) 22%, rgba(255, 255, 255, 0.2) 23% 32%, rgba(255, 255, 255, 0.06) 33%, transparent 35% 54%, rgba(92, 99, 110, 0.035) 55%, rgba(92, 99, 110, 0.1) 56% 65%, rgba(92, 99, 110, 0.035) 66%, transparent 68%),
-    linear-gradient(151deg, transparent 0 37%, rgba(255, 255, 255, 0.04) 38%, rgba(255, 255, 255, 0.14) 39% 47%, rgba(255, 255, 255, 0.04) 48%, transparent 50%);
-  filter: blur(8px) saturate(108%);
+    linear-gradient(116deg, transparent 0 20%, rgba(255, 255, 255, 0.08) 21%, rgba(255, 255, 255, 0.25) 22% 33%, rgba(255, 255, 255, 0.08) 34%, transparent 35% 53%, rgba(92, 99, 110, 0.05) 54%, rgba(92, 99, 110, 0.14) 55% 66%, rgba(92, 99, 110, 0.05) 67%, transparent 68%),
+    linear-gradient(151deg, transparent 0 36%, rgba(255, 255, 255, 0.06) 37%, rgba(255, 255, 255, 0.18) 38% 48%, rgba(255, 255, 255, 0.06) 49%, transparent 50%);
+  filter: blur(3px) saturate(112%);
   transform: translateZ(0);
 }
 
@@ -406,7 +406,7 @@ input:focus-visible {
   pointer-events: none;
   content: "";
   background:
-    linear-gradient(102deg, transparent 0 25%, rgba(255, 255, 255, 0.035) 26%, rgba(255, 255, 255, 0.1) 27% 30%, rgba(255, 255, 255, 0.025) 31%, transparent 33%),
+    linear-gradient(102deg, transparent 0 25%, rgba(255, 255, 255, 0.045) 26%, rgba(255, 255, 255, 0.14) 27% 30%, rgba(255, 255, 255, 0.04) 31%, transparent 33%),
     radial-gradient(circle at 72% 22%, rgba(255, 255, 255, 0.08), transparent 28%);
   opacity: 0.42;
   mix-blend-mode: screen;
