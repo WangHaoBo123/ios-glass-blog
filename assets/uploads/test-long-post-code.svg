@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">代码测试面板</title>
+  <desc id="desc">用于测试文章图片、代码段和长文排版的轻量 SVG 图片。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#565a60"/>
+      <stop offset="0.48" stop-color="#292b30"/>
+      <stop offset="1" stop-color="#111316"/>
+    </linearGradient>
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="4" seed="19"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 0.12"/>
+      </feComponentTransfer>
+    </filter>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <rect width="1280" height="720" filter="url(#noise)" opacity="0.45"/>
+  <g transform="translate(160 110)">
+    <rect width="960" height="500" rx="30" fill="#f8fafc" opacity="0.12" stroke="#fff" stroke-opacity="0.28"/>
+    <rect x="0" y="0" width="960" height="68" rx="30" fill="#fff" opacity="0.13"/>
+    <circle cx="42" cy="34" r="8" fill="#fff" opacity="0.54"/>
+    <circle cx="70" cy="34" r="8" fill="#fff" opacity="0.36"/>
+    <circle cx="98" cy="34" r="8" fill="#fff" opacity="0.24"/>
+    <g font-family="Consolas, Menlo, monospace" font-size="24" fill="#fff">
+      <text x="64" y="128" opacity="0.88">const mood = "quiet glass";</text>
+      <text x="64" y="180" opacity="0.68">function renderPost(post) {</text>
+      <text x="104" y="232" opacity="0.78">return post.title.trim();</text>
+      <text x="64" y="284" opacity="0.68">}</text>
+      <text x="64" y="374" opacity="0.56">/* scroll, search, image, code */</text>
+    </g>
+    <path d="M620 170 C720 135 810 178 898 142" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round" opacity="0.22"/>
+    <path d="M604 418 C706 380 786 444 902 402" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round" opacity="0.18"/>
+  </g>
+</svg>

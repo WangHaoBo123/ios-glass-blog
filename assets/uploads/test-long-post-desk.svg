@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">深灰色磨砂玻璃写作桌面</title>
+  <desc id="desc">用于博客长文章测试的轻量 SVG 图片。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3f4247"/>
+      <stop offset="0.52" stop-color="#202226"/>
+      <stop offset="1" stop-color="#555960"/>
+    </linearGradient>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="8"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 0.16"/>
+      </feComponentTransfer>
+    </filter>
+    <filter id="blur">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <rect width="1280" height="720" filter="url(#grain)" opacity="0.38"/>
+  <g opacity="0.64" filter="url(#blur)">
+    <circle cx="260" cy="150" r="150" fill="#ffffff" opacity="0.14"/>
+    <circle cx="1040" cy="560" r="180" fill="#ffffff" opacity="0.12"/>
+  </g>
+  <g transform="translate(205 144)">
+    <rect width="870" height="430" rx="34" fill="#fff" opacity="0.12" stroke="#fff" stroke-opacity="0.34"/>
+    <rect x="52" y="62" width="330" height="18" rx="9" fill="#fff" opacity="0.72"/>
+    <rect x="52" y="108" width="690" height="12" rx="6" fill="#fff" opacity="0.3"/>
+    <rect x="52" y="138" width="610" height="12" rx="6" fill="#fff" opacity="0.22"/>
+    <rect x="52" y="196" width="760" height="120" rx="18" fill="#0d0f12" opacity="0.38"/>
+    <rect x="86" y="230" width="245" height="10" rx="5" fill="#fff" opacity="0.38"/>
+    <rect x="86" y="258" width="520" height="10" rx="5" fill="#fff" opacity="0.22"/>
+    <rect x="86" y="286" width="390" height="10" rx="5" fill="#fff" opacity="0.18"/>
+    <path d="M92 374 C210 342 298 404 414 370 S620 340 756 382" fill="none" stroke="#fff" stroke-width="15" stroke-linecap="round" opacity="0.26"/>
+  </g>
+</svg>

@@ -1,6 +1,20 @@
 {
   "posts": [
     {
+      "slug": "long-feature-test",
+      "title": "一篇用来测试博客功能的长文章",
+      "date": "2026-05-17",
+      "category": "测试",
+      "summary": "一篇专门用来测试目录、阅读进度、图片、代码块、搜索和长文滚动的综合文章。",
+      "tags": [
+        "测试",
+        "Markdown",
+        "图片",
+        "代码块"
+      ],
+      "file": "./posts/long-feature-test.md"
+    },
+    {
       "slug": "22233311",
       "title": "22233311",
       "date": "2026-05-17",
