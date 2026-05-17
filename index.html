@@ -17,7 +17,7 @@
     <meta property="og:url" content="https://starytra32.top/" />
     <title>灰玻璃日记</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=20260517-bottom-progress" />
+    <link rel="stylesheet" href="./styles.css?v=20260517-apple-polish" />
   </head>
   <body>
     <a class="skip-link" href="#content">跳到正文</a>
@@ -46,6 +46,13 @@
         </div>
       </nav>
     </header>
+
+    <div class="reader-floating-title" data-reader-floating-title aria-hidden="true" hidden>
+      <span class="reader-floating-title-text" data-reader-floating-title-text></span>
+      <span class="reader-floating-title-meter" aria-hidden="true">
+        <span data-floating-reading-progress-bar></span>
+      </span>
+    </div>
 
     <aside class="profile-dock" aria-label="个人信息" data-list-view hidden>
       <img class="profile-avatar profile-avatar-img" src="./assets/avatar.jpg" alt="你的名字头像" />
@@ -155,12 +162,18 @@
       <span data-bottom-reading-progress-bar></span>
     </div>
 
-    <script src="./site-config.js?v=20260517-bottom-progress"></script>
-    <script src="./remote-api.js?v=20260517-bottom-progress"></script>
-    <script src="./auth.js?v=20260517-bottom-progress"></script>
-    <script src="./opening.js?v=20260517-bottom-progress"></script>
-    <script src="./page-transition.js?v=20260517-bottom-progress"></script>
-    <script src="./cursor-trail.js?v=20260517-bottom-progress"></script>
-    <script src="./script.js?v=20260517-bottom-progress"></script>
+    <div class="image-preview" data-image-preview hidden>
+      <button class="image-preview-close" type="button" data-image-preview-close aria-label="关闭图片预览"></button>
+      <img src="" alt="" data-image-preview-img />
+      <p data-image-preview-caption></p>
+    </div>
+
+    <script src="./site-config.js?v=20260517-apple-polish"></script>
+    <script src="./remote-api.js?v=20260517-apple-polish"></script>
+    <script src="./auth.js?v=20260517-apple-polish"></script>
+    <script src="./opening.js?v=20260517-apple-polish"></script>
+    <script src="./page-transition.js?v=20260517-apple-polish"></script>
+    <script src="./cursor-trail.js?v=20260517-apple-polish"></script>
+    <script src="./script.js?v=20260517-apple-polish"></script>
   </body>
 </html>

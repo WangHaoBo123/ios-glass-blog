@@ -14,6 +14,12 @@ const readerBody = document.querySelector("[data-reader-body]");
 const readerToc = document.querySelector("[data-reader-toc]");
 const bottomReadingProgress = document.querySelector("[data-bottom-reading-progress]");
 const bottomReadingProgressBar = document.querySelector("[data-bottom-reading-progress-bar]");
+const floatingReaderTitle = document.querySelector("[data-reader-floating-title]");
+const floatingReaderTitleText = document.querySelector("[data-reader-floating-title-text]");
+const floatingReadingProgressBar = document.querySelector("[data-floating-reading-progress-bar]");
+const imagePreview = document.querySelector("[data-image-preview]");
+const imagePreviewImg = document.querySelector("[data-image-preview-img]");
+const imagePreviewCaption = document.querySelector("[data-image-preview-caption]");
 const postNeighbors = document.querySelector("[data-post-neighbors]");
 const archiveView = document.querySelector("[data-archive-view]");
 const archiveList = document.querySelector("[data-archive-list]");
@@ -558,13 +564,13 @@ function renderFeatured(post) {
   `;
 }
 
-function renderPostCard(post) {
+function renderPostCard(post, index = 0) {
   const manageLink = authorIsSignedIn()
     ? `<a class="manage-link card-manage-link" href="./manage.html#post/${encodeURIComponent(post.slug)}">管理</a>`
     : "";
 
   return `
-    <article class="post-card">
+    <article class="post-card" style="--card-index: ${Math.min(index, 8)};">
       <a class="post-card-link" href="#post/${encodeURIComponent(post.slug)}">
         <div class="post-meta">${renderMeta(post)}</div>
         <h3>${escapeHtml(post.title)}</h3>
@@ -702,6 +708,7 @@ function renderPostNeighbors(post) {
 }
 
 function showListView() {
+  closeImagePreview();
   stopReadingProgress();
   listViews.forEach((view) => {
     view.hidden = false;
@@ -714,6 +721,7 @@ function showListView() {
 }
 
 function hideListView() {
+  closeImagePreview();
   stopReadingProgress();
   listViews.forEach((view) => {
     view.hidden = true;
@@ -756,6 +764,7 @@ function showPost(slug) {
 
   if (readerMeta) readerMeta.innerHTML = renderMeta(post);
   if (readerTitle) readerTitle.textContent = post.title;
+  if (floatingReaderTitleText) floatingReaderTitleText.textContent = post.title;
   if (readerSummary) readerSummary.textContent = post.summary;
   if (readerTags) readerTags.innerHTML = renderTagList(post.tags);
   if (readerBody) readerBody.innerHTML = markdownToHtml(contentWithLegacyImages(post.content, post.images));
@@ -855,12 +864,30 @@ function updateReadingProgress() {
   if (bottomReadingProgressBar) {
     bottomReadingProgressBar.style.transform = `scaleX(${progress})`;
   }
+
+  if (floatingReadingProgressBar) {
+    floatingReadingProgressBar.style.transform = `scaleX(${progress})`;
+  }
+}
+
+function syncChromeState() {
+  document.body.classList.toggle("is-scrolled", window.scrollY > 18);
+
+  const reading = Boolean(reader && !reader.hidden);
+  document.body.classList.toggle("is-reading-post", reading);
+
+  if (floatingReaderTitle) {
+    const readerTop = reader?.getBoundingClientRect().top ?? 0;
+    const showTitle = reading && readerTop < -72;
+    floatingReaderTitle.hidden = !showTitle;
+  }
 }
 
 function queueReadingProgressUpdate() {
   if (activeProgressFrame) return;
   activeProgressFrame = requestAnimationFrame(() => {
     activeProgressFrame = 0;
+    syncChromeState();
     updateReadingProgress();
   });
 }
@@ -868,6 +895,7 @@ function queueReadingProgressUpdate() {
 function startReadingProgress() {
   stopReadingProgress();
   if (bottomReadingProgress) bottomReadingProgress.hidden = false;
+  syncChromeState();
   updateReadingProgress();
   window.addEventListener("scroll", queueReadingProgressUpdate, { passive: true });
   window.addEventListener("resize", queueReadingProgressUpdate);
@@ -882,6 +910,9 @@ function stopReadingProgress() {
   window.removeEventListener("resize", queueReadingProgressUpdate);
   if (bottomReadingProgress) bottomReadingProgress.hidden = true;
   if (bottomReadingProgressBar) bottomReadingProgressBar.style.transform = "scaleX(0)";
+  if (floatingReaderTitle) floatingReaderTitle.hidden = true;
+  if (floatingReadingProgressBar) floatingReadingProgressBar.style.transform = "scaleX(0)";
+  document.body.classList.remove("is-reading-post");
 }
 
 function updateStats() {
@@ -918,8 +949,27 @@ searchInput?.addEventListener("input", () => {
 });
 
 window.addEventListener("hashchange", routeWithTransition);
+window.addEventListener("scroll", syncChromeState, { passive: true });
+window.addEventListener("resize", syncChromeState);
 
 document.addEventListener("click", async (event) => {
+  const previewClose = event.target.closest("[data-image-preview-close]");
+  if (previewClose) {
+    closeImagePreview();
+    return;
+  }
+
+  if (imagePreview && event.target === imagePreview) {
+    closeImagePreview();
+    return;
+  }
+
+  const articleImage = event.target.closest(".article-image-block img");
+  if (articleImage) {
+    openImagePreview(articleImage);
+    return;
+  }
+
   const tocLink = event.target.closest("[data-toc-target]");
   if (tocLink) {
     event.preventDefault();
@@ -950,6 +1000,38 @@ document.addEventListener("click", async (event) => {
     }, 1400);
   }
 });
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && imagePreview && !imagePreview.hidden) {
+    closeImagePreview();
+  }
+});
+
+function openImagePreview(image) {
+  if (!imagePreview || !imagePreviewImg || !image) return;
+
+  imagePreviewImg.src = image.currentSrc || image.src;
+  imagePreviewImg.alt = image.alt || "";
+
+  if (imagePreviewCaption) {
+    imagePreviewCaption.textContent = image.closest("figure")?.querySelector("figcaption")?.textContent || image.alt || "";
+    imagePreviewCaption.hidden = !imagePreviewCaption.textContent.trim();
+  }
+
+  imagePreview.hidden = false;
+  document.body.classList.add("is-previewing-image");
+}
+
+function closeImagePreview() {
+  if (!imagePreview) return;
+  imagePreview.hidden = true;
+  document.body.classList.remove("is-previewing-image");
+
+  if (imagePreviewImg) {
+    imagePreviewImg.removeAttribute("src");
+    imagePreviewImg.alt = "";
+  }
+}
 
 function animateAmbientBars(time) {
   const t = time / 1000;
@@ -993,6 +1075,7 @@ async function init() {
   updateStats();
   if (loadingState) loadingState.hidden = true;
   route();
+  syncChromeState();
 }
 
 if (ambient || ambientBarA || ambientBarB) {
