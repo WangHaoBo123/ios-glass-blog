@@ -101,6 +101,7 @@ const fallbackPosts = [
 
 let posts = [];
 let activeFilter = "all";
+let activeProgressFrame = 0;
 
 function authorIsSignedIn() {
   return window.GlassBlogAuth?.isSignedIn?.() === true;
@@ -457,6 +458,33 @@ function renderTagList(tags) {
   return tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("");
 }
 
+function postAccentStyle(post) {
+  const seed = [...String(post.slug || post.title || "post")].reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const tilt = (seed % 28) - 14;
+  const glowX = 18 + (seed % 58);
+  const glowY = 18 + ((seed * 7) % 54);
+  const ink = 18 + (seed % 18);
+  const silver = 92 + (seed % 18);
+  const glass = 30 + (seed % 12);
+
+  return [
+    `--cover-tilt: ${tilt}deg`,
+    `--cover-glow-x: ${glowX}%`,
+    `--cover-glow-y: ${glowY}%`,
+    `--cover-ink: ${ink}%`,
+    `--cover-silver: ${silver}%`,
+    `--cover-glass: ${glass}%`,
+  ].join("; ");
+}
+
+function postCoverMarkup(post, compact = false) {
+  return `
+    <span class="post-cover-mark${compact ? " is-compact" : ""}" style="${postAccentStyle(post)}" aria-hidden="true">
+      <span></span>
+    </span>
+  `;
+}
+
 function postLink(post, className = "") {
   return `
     <a class="${className}" href="#post/${encodeURIComponent(post.slug)}">
@@ -500,7 +528,16 @@ function renderReaderToc() {
 
   readerToc.hidden = false;
   readerToc.innerHTML = `
-    <p class="reader-toc-title">目录</p>
+    <div class="reader-toc-head">
+      <p class="reader-toc-title">目录</p>
+      <div class="reading-progress-ring" aria-label="阅读进度">
+        <svg viewBox="0 0 40 40" aria-hidden="true">
+          <circle class="progress-ring-track" cx="20" cy="20" r="16"></circle>
+          <circle class="progress-ring-value" cx="20" cy="20" r="16" data-reading-progress-ring></circle>
+        </svg>
+        <span data-reading-progress-text>0%</span>
+      </div>
+    </div>
     <nav class="toc-list" aria-label="文章标题导航">
       ${headings
         .map(
@@ -539,6 +576,7 @@ function renderFeatured(post) {
     ? `<a class="manage-link" href="./manage.html#post/${encodeURIComponent(post.slug)}">管理</a>`
     : "";
   featuredPost.innerHTML = `
+    ${postCoverMarkup(post)}
     <div class="post-meta">${renderMeta(post)}</div>
     <h2>${escapeHtml(post.title)}</h2>
     <p>${escapeHtml(post.summary)}</p>
@@ -558,6 +596,7 @@ function renderPostCard(post) {
   return `
     <article class="post-card">
       <a class="post-card-link" href="#post/${encodeURIComponent(post.slug)}">
+        ${postCoverMarkup(post, true)}
         <div class="post-meta">${renderMeta(post)}</div>
         <h3>${escapeHtml(post.title)}</h3>
         <p>${escapeHtml(post.summary)}</p>
@@ -694,6 +733,7 @@ function renderPostNeighbors(post) {
 }
 
 function showListView() {
+  stopReadingProgress();
   listViews.forEach((view) => {
     view.hidden = false;
   });
@@ -705,6 +745,7 @@ function showListView() {
 }
 
 function hideListView() {
+  stopReadingProgress();
   listViews.forEach((view) => {
     view.hidden = true;
   });
@@ -751,6 +792,7 @@ function showPost(slug) {
   if (readerBody) readerBody.innerHTML = markdownToHtml(contentWithLegacyImages(post.content, post.images));
   renderPostNeighbors(post);
   renderReaderToc();
+  startReadingProgress();
   updatePageMeta(`${post.title} - ${siteTitle}`, post.summary || siteDescription, `./index.html#post/${encodeURIComponent(post.slug)}`);
 
   const readerActions = reader?.querySelector(".reader-actions");
@@ -815,6 +857,55 @@ function scrollToArticleHeading(target) {
     top: Math.max(0, top),
     behavior: "smooth",
   });
+}
+
+function readingProgressValue() {
+  if (!reader || reader.hidden || !readerBody) return 0;
+
+  const rect = readerBody.getBoundingClientRect();
+  const viewport = window.innerHeight || document.documentElement.clientHeight;
+  const total = Math.max(1, rect.height - viewport * 0.72);
+  const read = Math.min(total, Math.max(0, -rect.top + viewport * 0.18));
+
+  return Math.min(1, Math.max(0, read / total));
+}
+
+function updateReadingProgress() {
+  const progress = readingProgressValue();
+  const ring = readerToc?.querySelector("[data-reading-progress-ring]");
+  const text = readerToc?.querySelector("[data-reading-progress-text]");
+
+  if (ring) {
+    ring.style.strokeDashoffset = String(100 - progress * 100);
+  }
+
+  if (text) {
+    text.textContent = `${Math.round(progress * 100)}%`;
+  }
+}
+
+function queueReadingProgressUpdate() {
+  if (activeProgressFrame) return;
+  activeProgressFrame = requestAnimationFrame(() => {
+    activeProgressFrame = 0;
+    updateReadingProgress();
+  });
+}
+
+function startReadingProgress() {
+  stopReadingProgress();
+  updateReadingProgress();
+  window.addEventListener("scroll", queueReadingProgressUpdate, { passive: true });
+  window.addEventListener("resize", queueReadingProgressUpdate);
+}
+
+function stopReadingProgress() {
+  if (activeProgressFrame) {
+    cancelAnimationFrame(activeProgressFrame);
+    activeProgressFrame = 0;
+  }
+  window.removeEventListener("scroll", queueReadingProgressUpdate);
+  window.removeEventListener("resize", queueReadingProgressUpdate);
 }
 
 function updateStats() {
