@@ -1,6 +1,18 @@
 {
   "posts": [
     {
+      "slug": "22233311",
+      "title": "22233311",
+      "date": "2026-05-17",
+      "category": "技术333",
+      "summary": "这里写一句文章摘要，会显示在首页卡片里。",
+      "tags": [
+        "Markdown",
+        "博客"
+      ],
+      "file": "./posts/22233311.md"
+    },
+    {
       "slug": "static-blog-system",
       "title": "如何把一个静态博客长期维护下去2",
       "date": "2026-05-16",
