@@ -12,6 +12,8 @@ const readerSummary = document.querySelector("[data-reader-summary]");
 const readerTags = document.querySelector("[data-reader-tags]");
 const readerBody = document.querySelector("[data-reader-body]");
 const readerToc = document.querySelector("[data-reader-toc]");
+const bottomReadingProgress = document.querySelector("[data-bottom-reading-progress]");
+const bottomReadingProgressBar = document.querySelector("[data-bottom-reading-progress-bar]");
 const postNeighbors = document.querySelector("[data-post-neighbors]");
 const archiveView = document.querySelector("[data-archive-view]");
 const archiveList = document.querySelector("[data-archive-list]");
@@ -849,6 +851,10 @@ function updateReadingProgress() {
   if (text) {
     text.textContent = `${Math.round(progress * 100)}%`;
   }
+
+  if (bottomReadingProgressBar) {
+    bottomReadingProgressBar.style.transform = `scaleX(${progress})`;
+  }
 }
 
 function queueReadingProgressUpdate() {
@@ -861,6 +867,7 @@ function queueReadingProgressUpdate() {
 
 function startReadingProgress() {
   stopReadingProgress();
+  if (bottomReadingProgress) bottomReadingProgress.hidden = false;
   updateReadingProgress();
   window.addEventListener("scroll", queueReadingProgressUpdate, { passive: true });
   window.addEventListener("resize", queueReadingProgressUpdate);
@@ -873,6 +880,8 @@ function stopReadingProgress() {
   }
   window.removeEventListener("scroll", queueReadingProgressUpdate);
   window.removeEventListener("resize", queueReadingProgressUpdate);
+  if (bottomReadingProgress) bottomReadingProgress.hidden = true;
+  if (bottomReadingProgressBar) bottomReadingProgressBar.style.transform = "scaleX(0)";
 }
 
 function updateStats() {
