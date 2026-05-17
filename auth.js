@@ -72,6 +72,16 @@
   }
 
   function getSession() {
+    if (window.GlassBlogRemote?.isConfigured?.() && window.GlassBlogRemote?.hasSession?.()) {
+      const remoteSession = window.GlassBlogRemote.getSession();
+      return {
+        name: remoteSession.name || "Author",
+        signedAt: remoteSession.expiresAt,
+        expiresAt: new Date(remoteSession.expiresAt).getTime(),
+        remote: true,
+      };
+    }
+
     const session = readJson(sessionKey);
     if (!session?.expiresAt || Date.now() > session.expiresAt) {
       localStorage.removeItem(sessionKey);
@@ -81,6 +91,8 @@
   }
 
   function isSignedIn() {
+    if (window.GlassBlogRemote?.isConfigured?.() && window.GlassBlogRemote?.hasSession?.()) return true;
+
     const account = getAccount();
     const session = getSession();
     return Boolean(account && session && session.name === account.name);
@@ -96,6 +108,7 @@
 
   function signOut() {
     localStorage.removeItem(sessionKey);
+    window.GlassBlogRemote?.clearSession?.();
     syncAuthorUi();
   }
 
@@ -150,6 +163,10 @@
   }
 
   async function signIn(password) {
+    if (window.GlassBlogRemote?.isConfigured?.()) {
+      return window.GlassBlogRemote.login(password);
+    }
+
     const account = getAccount();
     if (!account) {
       throw new Error("还没有初始化作者账号。");
@@ -174,6 +191,7 @@
   function syncAuthorUi() {
     const signedIn = isSignedIn();
     const account = getAccount();
+    const remoteSession = window.GlassBlogRemote?.isConfigured?.() ? window.GlassBlogRemote?.getSession?.() : null;
 
     document.documentElement.classList.toggle("is-author", signedIn);
     document.querySelectorAll("[data-authenticated-only]").forEach((element) => {
@@ -183,7 +201,7 @@
       element.hidden = signedIn;
     });
     document.querySelectorAll("[data-author-name]").forEach((element) => {
-      element.textContent = account?.name || "作者";
+      element.textContent = remoteSession?.name || account?.name || "作者";
     });
     document.querySelectorAll("[data-auth-logout]").forEach((button) => {
       if (button.dataset.authBound) return;
@@ -216,6 +234,7 @@
     const lockedPanel = document.querySelector("[data-auth-locked]");
     const modeLabel = document.querySelector("[data-auth-mode]");
     const resetButton = document.querySelector("[data-auth-reset]");
+    const remoteConfigured = window.GlassBlogRemote?.isConfigured?.() === true;
     const account = getAccount();
     const signedIn = isSignedIn();
     const canSetup = isLocalPreview();
@@ -226,13 +245,13 @@
     }
 
     if (modeLabel) {
-      modeLabel.textContent = account ? "Author login" : canSetup ? "Author setup" : "Read only";
+      modeLabel.textContent = remoteConfigured ? "Cloud login" : account ? "Author login" : canSetup ? "Author setup" : "Read only";
     }
 
-    if (setupForm) setupForm.hidden = Boolean(account) || !canSetup;
-    if (loginForm) loginForm.hidden = !account;
-    if (lockedPanel) lockedPanel.hidden = Boolean(account) || canSetup;
-    if (resetButton) resetButton.hidden = !account || !canSetup;
+    if (setupForm) setupForm.hidden = remoteConfigured || Boolean(account) || !canSetup;
+    if (loginForm) loginForm.hidden = remoteConfigured ? false : !account;
+    if (lockedPanel) lockedPanel.hidden = remoteConfigured || Boolean(account) || canSetup;
+    if (resetButton) resetButton.hidden = remoteConfigured || !account || !canSetup;
 
     setupForm?.addEventListener("submit", async (event) => {
       event.preventDefault();

@@ -504,11 +504,36 @@ function buildManagedPost(sourcePost) {
   };
 }
 
-function saveSelectedPost() {
+async function saveSelectedPost() {
   const post = selectedPost();
   if (!post) return;
 
   const nextPost = buildManagedPost(post);
+
+  if (window.GlassBlogRemote?.isConfigured?.()) {
+    try {
+      saveButton.disabled = true;
+      setStatus("正在把更改发布到 GitHub...");
+      const result = await window.GlassBlogRemote.publishPost(nextPost);
+
+      writePublishedPosts(readPublishedPosts().filter((item) => item.slug !== nextPost.slug));
+      writeHiddenPosts(readHiddenPosts().filter((slug) => slug !== nextPost.slug));
+      staticPostsCache = staticPostsCache.filter((item) => item.slug !== nextPost.slug);
+      staticPostsCache.push(normalizePost({ ...result.post, content: nextPost.content }, "static"));
+      posts = mergePosts(staticPostsCache, loadLocalPosts());
+      selectedSlug = nextPost.slug;
+      updateCategoryOptions();
+      renderList();
+      showEditor(selectedPost());
+      setStatus(`文章《${nextPost.title}》已保存到 GitHub。提交 ${String(result.commit || "").slice(0, 7)}，稍后线上刷新。`);
+    } catch (error) {
+      setStatus(error.message || "保存到 GitHub 失败。");
+    } finally {
+      saveButton.disabled = false;
+    }
+    return;
+  }
+
   const nextPublished = [nextPost, ...readPublishedPosts().filter((item) => item.slug !== nextPost.slug)];
 
   writePublishedPosts(nextPublished);
@@ -521,12 +546,35 @@ function saveSelectedPost() {
   setStatus(`文章《${nextPost.title}》已保存，本机首页会使用这个版本`);
 }
 
-function deleteSelectedPost() {
+async function deleteSelectedPost() {
   const post = selectedPost();
   if (!post) return;
 
-  const confirmed = window.confirm(`确定删除《${post.title}》吗？静态文件文章会在本机隐藏。`);
+  const confirmed = window.confirm(`确定删除《${post.title}》吗？${window.GlassBlogRemote?.isConfigured?.() ? "这会提交到 GitHub 仓库。" : "静态文件文章会在本机隐藏。"}`);
   if (!confirmed) return;
+
+  if (window.GlassBlogRemote?.isConfigured?.()) {
+    try {
+      deleteButton.disabled = true;
+      setStatus("正在从 GitHub 删除文章...");
+      const result = await window.GlassBlogRemote.deletePost(post.slug);
+
+      writePublishedPosts(readPublishedPosts().filter((item) => item.slug !== post.slug));
+      writeHiddenPosts(readHiddenPosts().filter((slug) => slug !== post.slug));
+      staticPostsCache = staticPostsCache.filter((item) => item.slug !== post.slug);
+      posts = mergePosts(staticPostsCache, loadLocalPosts());
+      selectedSlug = posts[0]?.slug || "";
+      updateCategoryOptions();
+      renderList();
+      showEditor(selectedPost());
+      setStatus(`文章《${post.title}》已从 GitHub 删除。提交 ${String(result.commit || "").slice(0, 7)}，稍后线上刷新。`);
+    } catch (error) {
+      setStatus(error.message || "从 GitHub 删除失败。");
+    } finally {
+      deleteButton.disabled = false;
+    }
+    return;
+  }
 
   writePublishedPosts(readPublishedPosts().filter((item) => item.slug !== post.slug));
 
@@ -635,8 +683,12 @@ document.addEventListener("keydown", (event) => {
     announceShortcut(command);
   }
 });
-saveButton?.addEventListener("click", saveSelectedPost);
-deleteButton?.addEventListener("click", deleteSelectedPost);
+saveButton?.addEventListener("click", () => {
+  saveSelectedPost();
+});
+deleteButton?.addEventListener("click", () => {
+  deleteSelectedPost();
+});
 openButton?.addEventListener("click", openSelectedPost);
 cleanEmbeddedImagesButton?.addEventListener("click", cleanOldEmbeddedImages);
 mediaEditor = window.GlassBlogMediaEditor?.create({

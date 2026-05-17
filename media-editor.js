@@ -418,12 +418,24 @@
     updateAssetButton() {
       if (!this.assetFolderButton) return;
 
+      if (window.GlassBlogRemote?.isConfigured?.()) {
+        this.assetFolderButton.classList.add("is-connected");
+        this.assetFolderButton.textContent = "云端图片";
+        return;
+      }
+
       const connected = Boolean(this.uploadsDirectoryHandle);
       this.assetFolderButton.classList.toggle("is-connected", connected);
       this.assetFolderButton.textContent = connected ? "目录已连" : "图片目录";
     }
 
     async connectAssetFolder() {
+      if (window.GlassBlogRemote?.isConfigured?.()) {
+        this.updateAssetButton();
+        this.onStatus("线上发布模式会自动把图片上传到 GitHub，不需要选择本地图片目录。");
+        return true;
+      }
+
       if (!window.showDirectoryPicker) {
         this.onStatus("当前浏览器不支持自动写入图片文件夹。请用 Chrome 或 Edge 打开本地预览。");
         return false;
@@ -464,11 +476,28 @@
     }
 
     async ensureAssetFolder() {
+      if (window.GlassBlogRemote?.isConfigured?.()) return true;
       if (this.uploadsDirectoryHandle) return true;
       return this.connectAssetFolder();
     }
 
     async saveImageFile(file, index) {
+      if (window.GlassBlogRemote?.isConfigured?.()) {
+        const optimized = await optimizeImageFile(file);
+        const uploadFile = new File(
+          [optimized.blob],
+          `${safeFilename(this.filenamePrefixProvider())}-${Date.now()}-${index + 1}.${optimized.extension}`,
+          { type: optimized.blob.type || file.type || "application/octet-stream" },
+        );
+        const uploaded = await window.GlassBlogRemote.uploadFile(uploadFile, this.filenamePrefixProvider(), index);
+
+        return {
+          src: uploaded.src,
+          bytesBefore: file.size,
+          bytesAfter: optimized.blob.size,
+        };
+      }
+
       const ready = await this.ensureAssetFolder();
       if (!ready) return null;
 

@@ -31,6 +31,7 @@ const categoryLabels = {
 };
 const publishedPostsKey = "glass-blog-published-posts";
 const hiddenPostsKey = "glass-blog-hidden-posts";
+const siteUrl = "https://starytra32.top/";
 const siteTitle = "灰玻璃日记";
 const siteDescription = "一个深色磨砂玻璃风格的个人静态博客，可写 Markdown 文章并部署到 GitHub Pages。";
 
@@ -126,16 +127,17 @@ function setCanonical(path = "./index.html") {
     canonical.rel = "canonical";
     document.head.append(canonical);
   }
-  canonical.href = path;
+  canonical.href = new URL(path, siteUrl).href;
 }
 
 function updatePageMeta(title = siteTitle, description = siteDescription, canonical = "./index.html") {
+  const absoluteCanonical = new URL(canonical, siteUrl).href;
   document.title = title;
   setMetaContent('meta[name="description"]', description);
   setMetaContent('meta[property="og:title"]', title);
   setMetaContent('meta[property="og:description"]', description);
-  setMetaContent('meta[property="og:url"]', canonical);
-  setCanonical(canonical);
+  setMetaContent('meta[property="og:url"]', absoluteCanonical);
+  setCanonical(absoluteCanonical);
 }
 
 function cleanHighlightColor(value) {

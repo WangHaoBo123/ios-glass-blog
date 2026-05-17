@@ -1,0 +1,11 @@
+name = "ios-glass-blog-publisher"
+main = "cloudflare-worker.mjs"
+compatibility_date = "2026-05-17"
+
+[vars]
+GITHUB_OWNER = "WangHaoBo123"
+GITHUB_REPO = "ios-glass-blog"
+GITHUB_BRANCH = "main"
+SITE_URL = "https://starytra32.top"
+ALLOWED_ORIGIN = "https://starytra32.top"
+AUTHOR_NAME = "StaryTra 32"

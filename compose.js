@@ -594,13 +594,37 @@ function validatePublishDraft(draft) {
   return "";
 }
 
-function publishCurrentPost() {
+async function publishCurrentPost() {
   flushScheduledUpdate();
   const draft = getDraft();
   const error = validatePublishDraft(draft);
 
   if (error) {
     setStatus(error);
+    return;
+  }
+
+  if (window.GlassBlogRemote?.isConfigured?.()) {
+    try {
+      publishPostButton.disabled = true;
+      setStatus("正在发布到 GitHub，GitHub Pages 稍后会自动刷新...");
+      const result = await window.GlassBlogRemote.publishPost(draft);
+      writeHiddenPosts(readHiddenPosts().filter((slug) => slug !== draft.slug));
+
+      if (currentDraftId) {
+        writeSavedDrafts(readSavedDrafts().filter((item) => item.id !== currentDraftId));
+        setCurrentDraftId("");
+        renderSavedDrafts();
+      }
+
+      updatePublishState({ ...draft, publishedAt: new Date().toISOString() });
+      setAutosaveState();
+      setStatus(`文章《${draft.title}》已发布到 GitHub。提交 ${String(result.commit || "").slice(0, 7)}，等 Pages 部署完成后线上可见。`);
+    } catch (error) {
+      setStatus(error.message || "发布到 GitHub 失败。");
+    } finally {
+      publishPostButton.disabled = false;
+    }
     return;
   }
 
@@ -946,7 +970,9 @@ document.addEventListener("keydown", (event) => {
 downloadButton?.addEventListener("click", downloadMarkdown);
 saveDraftButton?.addEventListener("click", saveCurrentDraft);
 newDraftButton?.addEventListener("click", createNewDraft);
-publishPostButton?.addEventListener("click", publishCurrentPost);
+publishPostButton?.addEventListener("click", () => {
+  publishCurrentPost();
+});
 copyEntryButton?.addEventListener("click", () => {
   copyEntry().catch(() => setStatus("复制失败"));
 });
