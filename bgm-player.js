@@ -244,7 +244,7 @@
         <span class="bgm-prompt-mark" aria-hidden="true"></span>
         <div class="bgm-prompt-copy">
           <strong id="bgm-prompt-title">播放背景音乐吗？</strong>
-          <span>点击播放开启随机歌单；点击窗口外任意位置可关闭。</span>
+          <span>点击任意处关闭窗口）</span>
         </div>
         <button class="bgm-prompt-play" type="button" data-bgm-prompt-play>播放</button>
       </div>
@@ -253,10 +253,11 @@
     document.body.append(prompt);
     window.requestAnimationFrame(() => prompt?.classList.add("is-visible"));
 
-    prompt.addEventListener("click", (event) => {
-      if (event.target === prompt) closePrompt();
+    prompt.addEventListener("click", closePrompt);
+    prompt.querySelector("[data-bgm-prompt-play]")?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      acceptPromptPlayback();
     });
-    prompt.querySelector("[data-bgm-prompt-play]")?.addEventListener("click", acceptPromptPlayback);
   }
 
   toggleButton?.addEventListener("click", togglePlayback);
