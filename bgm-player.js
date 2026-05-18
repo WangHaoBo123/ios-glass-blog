@@ -1,7 +1,6 @@
 (function () {
   const playlistUrl = "./assets/music/playlist.json?v=20260518-bgm";
   const enabledKey = "glass-blog-bgm-enabled";
-  const promptClosedKey = "glass-blog-bgm-prompt-closed";
   const volumeKey = "glass-blog-bgm-volume";
   const defaultVolume = 0.42;
   const fallbackTracks = [
@@ -62,7 +61,6 @@
     if (!prompt) return;
 
     prompt.classList.add("is-leaving");
-    sessionStorage.setItem(promptClosedKey, "1");
     window.setTimeout(() => {
       prompt?.remove();
       prompt = null;
@@ -232,7 +230,7 @@
   }
 
   function showPrompt() {
-    if (prompt || !tracks.length || sessionStorage.getItem(promptClosedKey) === "1") return;
+    if (prompt || !tracks.length || !audio.paused) return;
 
     prompt = document.createElement("div");
     prompt.className = "bgm-prompt";
