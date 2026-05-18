@@ -27,6 +27,7 @@
   let originalMainId = "";
   let originalTitle = document.title;
   let softMain = null;
+  let activeTransition = false;
 
   const softPageNames = new Set(["about.html", "login.html"]);
 
@@ -54,11 +55,13 @@
 
   function reset() {
     clearTransitionTimers();
+    activeTransition = false;
     overlay.classList.remove("is-visible", "is-entering");
   }
 
   function begin() {
     clearTransitionTimers();
+    activeTransition = true;
     overlay.classList.remove("is-entering");
     overlay.classList.add("is-visible");
   }
@@ -70,6 +73,7 @@
       overlay.classList.remove("is-visible");
       enterTimer = window.setTimeout(() => {
         overlay.classList.remove("is-entering");
+        activeTransition = false;
       }, enterDuration + 80);
     });
   }
@@ -261,6 +265,13 @@
     begin,
     end,
     reset,
+    isActive() {
+      return activeTransition;
+    },
+    timing: {
+      leaveDuration,
+      enterDuration,
+    },
   };
 
   window.addEventListener("pageshow", (event) => {

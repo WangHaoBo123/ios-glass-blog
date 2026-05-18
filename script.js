@@ -1011,9 +1011,14 @@ function showPost(slug) {
     `;
   }
 
-  requestAnimationFrame(() => {
-    reader?.classList.add("is-reader-entering");
-  });
+  const transitionDelay = window.GlassBlogTransition?.isActive?.()
+    ? (window.GlassBlogTransition?.timing?.enterDuration ?? 560) + 120
+    : 80;
+  window.setTimeout(() => {
+    requestAnimationFrame(() => {
+      reader?.classList.add("is-reader-entering");
+    });
+  }, transitionDelay);
 
   reader?.scrollIntoView({ block: "start" });
 }
