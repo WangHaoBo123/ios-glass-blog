@@ -2219,6 +2219,7 @@ h1 {
   position: sticky;
   top: 104px;
   max-height: calc(100vh - 132px);
+  overflow-x: hidden;
   overflow-y: auto;
   padding: 16px;
   border: 1px solid var(--line);
@@ -2233,6 +2234,12 @@ h1 {
     inset 0 -18px 36px rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(30px) saturate(160%);
   -webkit-backdrop-filter: blur(30px) saturate(160%);
+  scrollbar-width: none;
+}
+
+.reader-toc::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .reader-toc-head {
@@ -2841,6 +2848,8 @@ body.is-reading-post .bgm-dock {
   position: relative;
   display: grid;
   gap: 4px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .toc-active-indicator {
@@ -2878,11 +2887,14 @@ body.is-reading-post .bgm-dock {
 .toc-link {
   position: relative;
   display: block;
+  min-width: 0;
   padding: 7px 8px 7px 12px;
+  overflow-wrap: anywhere;
   color: var(--muted-strong);
   border-radius: 9px;
   font-size: 12px;
   line-height: 1.45;
+  word-break: break-word;
   transition:
     color 180ms ease,
     background-color 180ms ease,
@@ -2896,7 +2908,7 @@ body.is-reading-post .bgm-dock {
 }
 
 .toc-link.is-active {
-  transform: translateX(3px);
+  transform: none;
 }
 
 .toc-level-1 {
@@ -2904,16 +2916,16 @@ body.is-reading-post .bgm-dock {
 }
 
 .toc-level-2 {
-  padding-left: 22px;
+  padding-left: 20px;
 }
 
 .toc-level-3 {
-  padding-left: 34px;
+  padding-left: 28px;
   color: var(--muted);
 }
 
 .toc-level-4 {
-  padding-left: 46px;
+  padding-left: 34px;
   color: var(--muted);
   font-size: 11px;
 }
@@ -3103,63 +3115,116 @@ body.is-reading-post .bgm-dock {
 .neighbor-card {
   position: relative;
   display: grid;
-  gap: 8px;
-  min-height: 138px;
-  padding: 20px;
+  align-content: end;
+  gap: 10px;
+  min-height: 174px;
+  padding: 24px 24px 26px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 28px;
   background:
-    radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.1), transparent 42%),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.035)),
-    rgba(255, 255, 255, 0.052);
+    radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.18), transparent 40%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.036)),
+    rgba(255, 255, 255, 0.062);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    0 14px 34px rgba(0, 0, 0, 0.12);
+    inset 0 1px 0 rgba(255, 255, 255, 0.32),
+    inset 0 -22px 42px rgba(255, 255, 255, 0.055),
+    0 20px 42px rgba(0, 0, 0, 0.18);
+  isolation: isolate;
+}
+
+.neighbor-card::before {
+  position: absolute;
+  top: 22px;
+  z-index: -1;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  color: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.045)),
+    rgba(255, 255, 255, 0.055);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    0 10px 24px rgba(0, 0, 0, 0.12);
+  content: "";
 }
 
 .neighbor-card::after {
   position: absolute;
-  right: 16px;
-  bottom: 16px;
-  width: 78px;
-  height: 9px;
-  border-radius: 999px 12px 999px 18px;
+  right: 20px;
+  top: 28px;
+  width: 96px;
+  height: 10px;
+  border-radius: 999px 14px 999px 20px;
   background:
-    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.24) 18% 80%, transparent),
-    rgba(255, 255, 255, 0.11);
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3) 18% 80%, transparent),
+    rgba(255, 255, 255, 0.12);
   content: "";
-  opacity: 0.78;
-  transform: rotate(-2deg);
+  opacity: 0.68;
+  transform: rotate(-3deg);
+  mix-blend-mode: screen;
+}
+
+.neighbor-card-prev::before {
+  left: 22px;
+  content: "←";
+}
+
+.neighbor-card-next {
+  text-align: right;
+}
+
+.neighbor-card-next::before {
+  right: 22px;
+  content: "→";
+}
+
+.neighbor-card-next::after {
+  right: auto;
+  left: 20px;
+  transform: rotate(3deg);
 }
 
 .neighbor-card:hover {
-  border-color: rgba(255, 255, 255, 0.24);
-  background: rgba(255, 255, 255, 0.09);
-  transform: translate3d(0, -5px, 0);
+  border-color: rgba(255, 255, 255, 0.3);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.22), transparent 42%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.05)),
+    rgba(255, 255, 255, 0.08);
+  transform: translate3d(0, -8px, 0);
 }
 
 .neighbor-kicker {
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 12px;
+  text-transform: uppercase;
 }
 
 .neighbor-card strong {
-  max-width: min(94%, 360px);
+  max-width: min(96%, 420px);
   color: var(--text);
-  font-size: 18px;
-  line-height: 1.35;
+  font-size: clamp(20px, 2.2vw, 28px);
+  line-height: 1.18;
 }
 
 .neighbor-card small {
   display: -webkit-box;
-  max-width: 94%;
+  max-width: min(96%, 420px);
   overflow: hidden;
   color: var(--muted-strong);
   font-size: 12px;
   line-height: 1.55;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+.neighbor-card-next strong,
+.neighbor-card-next small {
+  justify-self: end;
 }
 
 .neighbor-card.is-empty {
@@ -3183,30 +3248,57 @@ body.is-reading-post .bgm-dock {
 
 .article-body > p:first-of-type {
   position: relative;
-  max-width: 760px;
-  margin-bottom: 28px;
-  padding: 18px 22px 18px 26px;
+  max-width: 800px;
+  margin: 6px 0 34px;
+  padding: 26px 30px 26px 34px;
+  overflow: hidden;
   color: #f7f8fa;
-  border-left: 2px solid rgba(255, 255, 255, 0.34);
-  border-radius: 0 18px 18px 0;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-left-color: rgba(255, 255, 255, 0.48);
+  border-radius: 26px;
   background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.075), transparent 78%),
-    rgba(255, 255, 255, 0.022);
-  font-size: 19px;
-  line-height: 1.86;
+    radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.15), transparent 38%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.028) 72%),
+    rgba(255, 255, 255, 0.034);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    0 20px 44px rgba(0, 0, 0, 0.13);
+  font-size: clamp(20px, 2vw, 24px);
+  line-height: 1.72;
   text-wrap: pretty;
 }
 
 .article-body > p:first-of-type::before {
   position: absolute;
-  left: -2px;
-  top: 16px;
-  width: 2px;
-  height: calc(100% - 32px);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow: 0 0 18px rgba(255, 255, 255, 0.18);
+  left: 22px;
+  top: 18px;
+  width: 108px;
+  height: 11px;
+  border-radius: 999px 16px 999px 22px;
+  background:
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3) 18% 82%, transparent),
+    rgba(255, 255, 255, 0.14);
   content: "";
+  opacity: 0.62;
+  transform: rotate(-2.5deg);
+  mix-blend-mode: screen;
+}
+
+.article-body > p:first-of-type::after {
+  position: absolute;
+  right: 24px;
+  bottom: 22px;
+  width: 64px;
+  height: 64px;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 20px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.02)),
+    rgba(255, 255, 255, 0.03);
+  content: "";
+  opacity: 0.45;
+  transform: rotate(8deg);
 }
 
 .article-body h1,
@@ -5368,12 +5460,32 @@ body.is-reading-post .bgm-dock {
   }
 
   .neighbor-card {
-    min-height: 96px;
+    min-height: 138px;
     padding: 16px;
+    border-radius: 22px;
+  }
+
+  .neighbor-card::before {
+    top: 16px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .neighbor-card-prev::before {
+    left: 16px;
+  }
+
+  .neighbor-card-next::before {
+    right: 16px;
+  }
+
+  .neighbor-card::after {
+    top: 20px;
+    width: 72px;
   }
 
   .neighbor-card strong {
-    font-size: 16px;
+    font-size: 18px;
   }
 
   .field-row {
@@ -5456,8 +5568,19 @@ body.is-reading-post .bgm-dock {
   }
 
   .article-body > p:first-of-type {
-    padding: 14px 16px 14px 18px;
+    padding: 22px 18px 20px;
+    border-radius: 22px;
     font-size: 17px;
+  }
+
+  .article-body > p:first-of-type::before {
+    left: 18px;
+    top: 14px;
+    width: 84px;
+  }
+
+  .article-body > p:first-of-type::after {
+    display: none;
   }
 
   .article-body h1 {
