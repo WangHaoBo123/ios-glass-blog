@@ -3,13 +3,32 @@
   const enabledKey = "glass-blog-bgm-enabled";
   const volumeKey = "glass-blog-bgm-volume";
   const defaultVolume = 0.42;
+  const fallbackTracks = [
+    {
+      title: "The Song of Destiny",
+      artist: "Sebastien Skaf · Stellar Blade",
+      src: "./assets/music/the-song-of-destiny-stellar-blade-sebastien-skaf.mp3",
+    },
+    {
+      title: "The Song of the Sirens",
+      artist: "Mothervibes",
+      src: "./assets/music/the-song-of-the-sirens-mothervibes.mp3",
+    },
+    {
+      title: "The Song of the Wanderer",
+      artist: "Chewie Melodies · Pealeaf",
+      src: "./assets/music/the-song-of-the-wanderer-chewie-melodies-pealeaf.mp3",
+    },
+  ];
 
   let tracks = [];
   let currentIndex = -1;
   let isReady = false;
 
-  const audio = new Audio();
-  audio.preload = "metadata";
+  const audio = document.createElement("audio");
+  audio.className = "bgm-audio";
+  audio.preload = "auto";
+  audio.setAttribute("playsinline", "");
   audio.volume = Number(localStorage.getItem(volumeKey)) || defaultVolume;
 
   const dock = document.createElement("aside");
@@ -30,7 +49,7 @@
     <button class="bgm-next" type="button" data-bgm-next aria-label="随机下一首" disabled></button>
   `;
 
-  document.body.append(dock);
+  document.body.append(dock, audio);
 
   const toggleButton = dock.querySelector("[data-bgm-toggle]");
   const nextButton = dock.querySelector("[data-bgm-next]");
@@ -58,6 +77,23 @@
       artist: String(track.artist || "Local playlist"),
       src: String(track.src),
     };
+  }
+
+  function describeAudioError(error) {
+    if (error?.name === "NotAllowedError") return "浏览器要求先点击播放";
+    if (error?.name === "NotSupportedError") return "浏览器不支持这个音频";
+
+    const mediaError = audio.error;
+    if (!mediaError) return "播放失败，请再点一次";
+
+    const messages = {
+      1: "播放被中断",
+      2: "音频文件加载失败",
+      3: "音频解码失败",
+      4: "浏览器不支持这个音频",
+    };
+
+    return messages[mediaError.code] || "播放失败，请再点一次";
   }
 
   function updatePlayingState(isPlaying) {
@@ -97,9 +133,9 @@
     try {
       await audio.play();
       updatePlayingState(true);
-    } catch {
+    } catch (error) {
       updatePlayingState(false);
-      setStatus("点击按钮开始播放");
+      setStatus(describeAudioError(error));
     }
   }
 
@@ -131,23 +167,28 @@
       await audio.play();
       updatePlayingState(true);
       setStatus(tracks[currentIndex]?.artist || "正在播放");
-    } catch {
+    } catch (error) {
       updatePlayingState(false);
-      setStatus("点击按钮开始播放");
+      setStatus(describeAudioError(error));
     }
   }
 
   async function loadPlaylist() {
-    try {
-      const response = await fetch(playlistUrl, { cache: "no-store" });
-      if (!response.ok) throw new Error("playlist missing");
+    if (window.location.protocol === "file:") {
+      tracks = fallbackTracks;
+      setStatus("本地文件模式");
+    } else {
+      try {
+        const response = await fetch(playlistUrl, { cache: "no-store" });
+        if (!response.ok) throw new Error("playlist missing");
 
-      const data = await response.json();
-      tracks = (Array.isArray(data.tracks) ? data.tracks : [])
-        .map(normalizeTrack)
-        .filter(Boolean);
-    } catch {
-      tracks = [];
+        const data = await response.json();
+        tracks = (Array.isArray(data.tracks) ? data.tracks : [])
+          .map(normalizeTrack)
+          .filter(Boolean);
+      } catch {
+        tracks = fallbackTracks;
+      }
     }
 
     isReady = true;
@@ -161,10 +202,10 @@
     }
 
     setTitle(`${tracks.length} tracks`);
-    setStatus("点击随机播放");
+    setStatus(window.location.protocol === "file:" ? "点击播放本地音乐" : "点击随机播放");
 
     if (localStorage.getItem(enabledKey) === "1") {
-      await playRandomTrack();
+      setStatus("点击继续播放");
     }
   }
 
@@ -176,6 +217,10 @@
   });
   audio.addEventListener("volumechange", () => {
     localStorage.setItem(volumeKey, String(audio.volume));
+  });
+  audio.addEventListener("error", () => {
+    updatePlayingState(false);
+    setStatus(describeAudioError());
   });
 
   loadPlaylist();

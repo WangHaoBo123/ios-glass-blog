@@ -2105,6 +2105,10 @@ h1 {
   -webkit-backdrop-filter: blur(24px) saturate(160%);
 }
 
+.bgm-audio {
+  display: none;
+}
+
 body.is-reading-post .bgm-dock {
   bottom: calc(max(22px, env(safe-area-inset-bottom)) + 14px);
 }
