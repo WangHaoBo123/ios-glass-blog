@@ -4,7 +4,7 @@
   const stateKey = "glass-blog-bgm-state";
   const suppressPromptKey = "glass-blog-bgm-suppress-next-prompt-v2";
   const volumeKey = "glass-blog-bgm-volume";
-  const defaultVolume = 0.42;
+  const defaultVolume = 0.24;
   const restoreMaxAge = 12 * 60 * 60 * 1000;
   const promptQuietPages = new Set(["about.html", "login.html", "compose.html", "manage.html"]);
   const fallbackTracks = [
