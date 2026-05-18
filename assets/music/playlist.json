@@ -1,3 +1,19 @@
 {
-  "tracks": []
+  "tracks": [
+    {
+      "title": "The Song of Destiny",
+      "artist": "Sebastien Skaf · Stellar Blade",
+      "src": "./assets/music/the-song-of-destiny-stellar-blade-sebastien-skaf.mp3"
+    },
+    {
+      "title": "The Song of the Sirens",
+      "artist": "Mothervibes",
+      "src": "./assets/music/the-song-of-the-sirens-mothervibes.mp3"
+    },
+    {
+      "title": "The Song of the Wanderer",
+      "artist": "Chewie Melodies · Pealeaf",
+      "src": "./assets/music/the-song-of-the-wanderer-chewie-melodies-pealeaf.mp3"
+    }
+  ]
 }
