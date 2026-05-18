@@ -35,6 +35,7 @@ const ambient = document.querySelector("[data-ambient]");
 const ambientBarA = document.querySelector('[data-ambient-bar="a"]');
 const ambientBarB = document.querySelector('[data-ambient-bar="b"]');
 const profileName = document.querySelector(".profile-copy strong");
+const profileStatus = document.querySelector("[data-profile-status]");
 const scriptHeroTitle = document.querySelector("[data-script-hero-title]");
 const typingIntro = document.querySelector("[data-typing-intro]");
 const typingIntroOutput = document.querySelector("[data-typing-output]");
@@ -118,6 +119,7 @@ let posts = [];
 let activeFilter = "all";
 let activeProgressFrame = 0;
 let listTransitionTimer = 0;
+let profileStatusTimer = 0;
 let typingIntroFrame = 0;
 const heroWritingDuration = 3200;
 
@@ -616,6 +618,7 @@ function renderReaderToc() {
     </div>
     <p class="reading-progress-copy">阅读进度 <span data-reading-progress-text>0%</span></p>
     <nav class="toc-list" aria-label="文章标题导航">
+      <span class="toc-active-indicator" aria-hidden="true"></span>
       ${
         headings.length
           ? headings
@@ -631,6 +634,23 @@ function renderReaderToc() {
       }
     </nav>
   `;
+}
+
+function syncTocIndicator(activeLink) {
+  const indicator = readerToc?.querySelector(".toc-active-indicator");
+  const list = readerToc?.querySelector(".toc-list");
+  if (!indicator || !list) return;
+
+  if (!activeLink) {
+    indicator.classList.remove("is-visible");
+    return;
+  }
+
+  const linkRect = activeLink.getBoundingClientRect();
+  const listRect = list.getBoundingClientRect();
+  indicator.style.transform = `translate3d(0, ${linkRect.top - listRect.top}px, 0)`;
+  indicator.style.height = `${linkRect.height}px`;
+  indicator.classList.add("is-visible");
 }
 
 function prepareArticleImages() {
@@ -656,10 +676,16 @@ function updateActiveTocHeading() {
   if (!readerToc || !readerBody || !reader || reader.hidden) return;
 
   const links = [...readerToc.querySelectorAll("[data-toc-target]")];
-  if (!links.length) return;
+  if (!links.length) {
+    syncTocIndicator(null);
+    return;
+  }
 
   const headings = [...readerBody.querySelectorAll("h1, h2, h3, h4")].filter((heading) => heading.id);
-  if (!headings.length) return;
+  if (!headings.length) {
+    syncTocIndicator(null);
+    return;
+  }
 
   const headerHeight = document.querySelector(".site-header")?.getBoundingClientRect().height || 0;
   const activationLine = headerHeight + Math.min(150, Math.max(92, window.innerHeight * 0.18));
@@ -671,9 +697,13 @@ function updateActiveTocHeading() {
     }
   });
 
+  let activeLink = null;
   links.forEach((link) => {
-    link.classList.toggle("is-active", link.dataset.tocTarget === activeHeading.id);
+    const isActive = link.dataset.tocTarget === activeHeading.id;
+    link.classList.toggle("is-active", isActive);
+    if (isActive) activeLink = link;
   });
+  syncTocIndicator(activeLink);
 }
 
 function contentWithLegacyImages(content, images) {
@@ -716,9 +746,11 @@ function renderPostCard(post, index = 0) {
   const manageLink = authorIsSignedIn()
     ? `<a class="manage-link card-manage-link" href="./manage.html#post/${encodeURIComponent(post.slug)}">管理</a>`
     : "";
+  const bentoPattern = ["post-card-wide", "", "post-card-tall", "", "post-card-soft", "", "post-card-wide"];
+  const bentoClass = bentoPattern[index % bentoPattern.length];
 
   return `
-    <article class="post-card" style="--card-index: ${Math.min(index, 8)};">
+    <article class="post-card${bentoClass ? ` ${bentoClass}` : ""}" style="--card-index: ${Math.min(index, 8)};">
       <a class="post-card-link" href="#post/${encodeURIComponent(post.slug)}">
         <div class="post-meta">${renderMeta(post)}</div>
         <h3>${escapeHtml(post.title)}</h3>
@@ -855,19 +887,27 @@ function renderPostNeighbors(post) {
   const related = posts
     .filter((item) => item.slug !== post.slug && item.tags.some((tag) => post.tags.includes(tag)))
     .slice(0, 3);
+  const neighborCard = (item, label, emptyText, direction) =>
+    item
+      ? `
+        <a class="neighbor-card neighbor-card-${direction}" href="#post/${encodeURIComponent(item.slug)}" aria-label="${escapeHtml(label)}：${escapeHtml(item.title)}">
+          <span class="neighbor-kicker">${escapeHtml(label)}</span>
+          <strong>${escapeHtml(item.title)}</strong>
+          <small>${escapeHtml(formatDate(item.date))} · ${escapeHtml(item.summary || item.categoryLabel || "")}</small>
+        </a>
+      `
+      : `
+        <span class="neighbor-card neighbor-card-${direction} is-empty">
+          <span class="neighbor-kicker">${escapeHtml(label)}</span>
+          <strong>${escapeHtml(emptyText)}</strong>
+          <small>继续从当前这篇慢慢读。</small>
+        </span>
+      `;
 
   postNeighbors.innerHTML = `
     <div class="neighbor-grid">
-      ${
-        previous
-          ? `<a class="neighbor-card" href="#post/${encodeURIComponent(previous.slug)}"><span>上一篇</span><strong>${escapeHtml(previous.title)}</strong></a>`
-          : `<span class="neighbor-card is-empty"><span>上一篇</span><strong>已经是最新一篇</strong></span>`
-      }
-      ${
-        next
-          ? `<a class="neighbor-card" href="#post/${encodeURIComponent(next.slug)}"><span>下一篇</span><strong>${escapeHtml(next.title)}</strong></a>`
-          : `<span class="neighbor-card is-empty"><span>下一篇</span><strong>已经到最早一篇</strong></span>`
-      }
+      ${neighborCard(previous, "上一篇", "已经是最新一篇", "prev")}
+      ${neighborCard(next, "下一篇", "已经到最早一篇", "next")}
     </div>
     ${
       related.length
@@ -941,7 +981,10 @@ function showPost(slug) {
   }
 
   hideListView();
-  if (reader) reader.hidden = false;
+  if (reader) {
+    reader.hidden = false;
+    reader.classList.remove("is-reader-entering");
+  }
 
   if (readerMeta) readerMeta.innerHTML = renderMeta(post);
   if (readerTitle) readerTitle.textContent = post.title;
@@ -967,6 +1010,10 @@ function showPost(slug) {
       ${manageLink}
     `;
   }
+
+  requestAnimationFrame(() => {
+    reader?.classList.add("is-reader-entering");
+  });
 
   reader?.scrollIntoView({ block: "start" });
 }
@@ -1111,12 +1158,33 @@ function stopReadingProgress() {
   if (floatingReaderTitle) floatingReaderTitle.hidden = true;
   if (floatingReadingProgressBar) floatingReadingProgressBar.style.transform = "scaleX(0)";
   readerToc?.querySelectorAll("[data-toc-target]").forEach((link) => link.classList.remove("is-active"));
+  syncTocIndicator(null);
   document.body.classList.remove("is-reading-post");
 }
 
 function updateStats() {
   if (totalPosts) totalPosts.textContent = String(posts.length);
   if (latestDate) latestDate.textContent = formatDate(posts[0]?.date || "");
+}
+
+function startProfileStatusLoop() {
+  if (!profileStatus) return;
+
+  const phrases = ["writing slowly", "thinking clearly", "reading softly", "building quietly"];
+  const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  let index = 0;
+  profileStatus.textContent = phrases[index];
+
+  if (reduceMotion || profileStatusTimer) return;
+
+  profileStatusTimer = window.setInterval(() => {
+    index = (index + 1) % phrases.length;
+    profileStatus.classList.add("is-changing");
+    window.setTimeout(() => {
+      profileStatus.textContent = phrases[index];
+      profileStatus.classList.remove("is-changing");
+    }, 180);
+  }, 4800);
 }
 
 filterList?.addEventListener("click", (event) => {
@@ -1182,6 +1250,7 @@ document.addEventListener("click", async (event) => {
     readerToc?.querySelectorAll("[data-toc-target]").forEach((link) => {
       link.classList.toggle("is-active", link === tocLink);
     });
+    syncTocIndicator(tocLink);
     return;
   }
 
@@ -1287,6 +1356,7 @@ async function init() {
 
   renderFilters();
   updateStats();
+  startProfileStatusLoop();
   if (loadingState) loadingState.hidden = true;
   route();
   syncChromeState();
