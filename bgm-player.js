@@ -239,7 +239,7 @@
     prompt.setAttribute("aria-labelledby", "bgm-prompt-title");
     prompt.innerHTML = `
       <div class="bgm-prompt-card">
-        <span class="bgm-prompt-mark" aria-hidden="true"></span>
+        <span class="bgm-prompt-mark" aria-hidden="true">music</span>
         <div class="bgm-prompt-copy">
           <strong id="bgm-prompt-title">播放背景音乐吗？</strong>
           <span>点击任意处关闭窗口</span>
