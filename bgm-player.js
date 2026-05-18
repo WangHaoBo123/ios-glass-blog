@@ -361,7 +361,7 @@
   }
 
   function showPrompt() {
-    if (prompt || !tracks.length || !audio.paused || localStorage.getItem(enabledKey) === "1") return;
+    if (prompt || !tracks.length || !audio.paused) return;
     if (isPromptQuietPage()) {
       closePrompt();
       return;
