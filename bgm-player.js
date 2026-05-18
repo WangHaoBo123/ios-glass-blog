@@ -56,6 +56,17 @@
       <strong data-bgm-title>Background music</strong>
       <span data-bgm-status>正在读取歌单</span>
     </div>
+    <div class="bgm-wave" aria-hidden="true">
+      <span style="--wave-index: 0"></span>
+      <span style="--wave-index: 1"></span>
+      <span style="--wave-index: 2"></span>
+      <span style="--wave-index: 3"></span>
+      <span style="--wave-index: 4"></span>
+      <span style="--wave-index: 5"></span>
+      <span style="--wave-index: 6"></span>
+      <span style="--wave-index: 7"></span>
+      <span style="--wave-index: 8"></span>
+    </div>
     <button class="bgm-next" type="button" data-bgm-next aria-label="随机下一首" disabled></button>
   `;
 
