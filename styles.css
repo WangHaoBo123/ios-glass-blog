@@ -66,6 +66,8 @@
   --weight-main: 700;
   --weight-strong: 700;
   --radius: 8px;
+  --panel-radius: 22px;
+  --panel-radius-small: 16px;
   --header-height: 76px;
 }
 
@@ -822,7 +824,7 @@ body.is-previewing-image {
   padding: 28px;
   color: var(--text);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 28px;
+  border-radius: 34px;
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.045)),
     rgba(32, 34, 38, 0.46);
@@ -1121,7 +1123,7 @@ h1 {
   overflow: hidden;
   align-self: end;
   padding: 8px;
-  border-radius: var(--radius);
+  border-radius: var(--panel-radius);
   box-shadow: var(--shadow);
   animation: panel-float-side 7s ease-in-out infinite alternate;
 }
@@ -1354,7 +1356,7 @@ h1 {
 .compose-panel {
   position: relative;
   overflow: hidden;
-  border-radius: var(--radius);
+  border-radius: var(--panel-radius);
   box-shadow:
     var(--shadow-soft),
     inset 0 1px 0 rgba(255, 255, 255, 0.82),
@@ -1719,7 +1721,7 @@ h1 {
   position: relative;
   overflow: hidden;
   padding: clamp(20px, 3vw, 30px);
-  border-radius: var(--radius);
+  border-radius: var(--panel-radius);
 }
 
 .archive-panel::after {
@@ -1889,7 +1891,7 @@ h1 {
   margin: 18px 0;
   padding: 18px;
   color: var(--muted);
-  border-radius: var(--radius);
+  border-radius: var(--panel-radius-small);
   text-align: center;
 }
 
@@ -1906,7 +1908,7 @@ h1 {
   max-width: 880px;
   margin: 0;
   padding: clamp(24px, 5vw, 54px);
-  border-radius: var(--radius);
+  border-radius: var(--panel-radius);
   box-shadow: var(--shadow);
 }
 
@@ -1918,7 +1920,7 @@ h1 {
   padding: 16px;
   border: 1px solid var(--line);
   border-bottom-color: var(--line-dark);
-  border-radius: var(--radius);
+  border-radius: var(--panel-radius-small);
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.06)),
     var(--glass);
@@ -2381,7 +2383,7 @@ body.is-reading-post .bgm-dock {
   max-width: min(1120px, 100%);
   max-height: min(78vh, 820px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius);
+  border-radius: var(--panel-radius);
   background: rgba(255, 255, 255, 0.06);
   box-shadow:
     0 30px 90px rgba(0, 0, 0, 0.5),
@@ -2616,7 +2618,7 @@ body.is-reading-post .bgm-dock {
   padding: 18px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: var(--radius);
+  border-radius: var(--panel-radius-small);
   background: rgba(255, 255, 255, 0.055);
 }
 
@@ -2657,7 +2659,7 @@ body.is-reading-post .bgm-dock {
   margin-top: 16px;
   padding: 18px;
   border: 1px solid rgba(255, 255, 255, 0.11);
-  border-radius: var(--radius);
+  border-radius: var(--panel-radius-small);
   background: rgba(255, 255, 255, 0.04);
 }
 
@@ -2797,7 +2799,7 @@ body.is-reading-post .bgm-dock {
   margin-top: 30px;
   padding: 18px 20px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius);
+  border-radius: var(--panel-radius-small);
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03)),
     rgba(255, 255, 255, 0.045);
@@ -2846,7 +2848,7 @@ body.is-reading-post .bgm-dock {
   position: relative;
   margin: 28px 0 34px;
   overflow: hidden;
-  border-radius: var(--radius);
+  border-radius: var(--panel-radius);
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.02)),
     rgba(255, 255, 255, 0.025);
@@ -3127,7 +3129,7 @@ body.is-reading-post .bgm-dock {
   padding: 34px 18px 28px;
   color: var(--muted);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: var(--panel-radius);
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.045)),
     var(--glass);
@@ -3169,7 +3171,7 @@ body.is-reading-post .bgm-dock {
 
 .compose-panel {
   padding: 24px;
-  border-radius: var(--radius);
+  border-radius: var(--panel-radius);
   box-shadow: var(--shadow-soft);
 }
 
@@ -3322,7 +3324,7 @@ body.is-reading-post .bgm-dock {
   gap: 4px;
   padding: 4px;
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: var(--panel-radius-small);
   background: rgba(255, 255, 255, 0.055);
 }
 
@@ -3411,7 +3413,7 @@ body.is-reading-post .bgm-dock {
   margin: 0;
   padding: 10px;
   border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 20px;
+  border-radius: 24px;
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.045)),
     rgba(32, 34, 38, 0.48);
@@ -3696,7 +3698,7 @@ body.is-reading-post .bgm-dock {
   min-height: 92px;
   color: var(--muted);
   border: 1px dashed rgba(255, 255, 255, 0.18);
-  border-radius: var(--radius);
+  border-radius: var(--panel-radius-small);
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)),
     rgba(0, 0, 0, 0.08);
@@ -3729,7 +3731,7 @@ body.is-reading-post .bgm-dock {
   cursor: grab;
   user-select: none;
   border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: var(--radius);
+  border-radius: var(--panel-radius);
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04)),
     rgba(0, 0, 0, 0.14);
@@ -3916,7 +3918,7 @@ body.is-reading-post .bgm-dock {
   align-items: stretch;
   padding: 6px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius);
+  border-radius: var(--panel-radius-small);
   background: rgba(255, 255, 255, 0.035);
 }
 
@@ -4003,7 +4005,7 @@ body.is-reading-post .bgm-dock {
 .preview-stage {
   max-width: 940px;
   padding: clamp(24px, 5vw, 54px);
-  border-radius: var(--radius);
+  border-radius: var(--panel-radius);
   box-shadow: var(--shadow);
 }
 
@@ -4105,7 +4107,7 @@ body.is-reading-post .bgm-dock {
   align-items: center;
   padding: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius);
+  border-radius: var(--panel-radius-small);
   background: rgba(255, 255, 255, 0.035);
 }
 
@@ -4193,7 +4195,7 @@ body.is-reading-post .bgm-dock {
   padding: 0 14px;
   color: #ffd9d9;
   border: 1px solid rgba(255, 150, 150, 0.28);
-  border-radius: var(--radius);
+  border-radius: var(--panel-radius-small);
   background: rgba(130, 20, 20, 0.16);
   font-family: var(--font-main);
   font-size: 13px;

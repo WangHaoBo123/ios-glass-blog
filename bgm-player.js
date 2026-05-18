@@ -30,8 +30,10 @@
   let currentTrack = null;
   let isReady = false;
   let isPageUnloading = false;
+  let isUserPausing = false;
   let lastStateWriteSecond = -1;
   let prompt = null;
+  let resumeOnGesture = null;
 
   const audio = document.createElement("audio");
   audio.className = "bgm-audio";
@@ -200,6 +202,41 @@
     audio.addEventListener("loadedmetadata", applyTime, { once: true });
   }
 
+  function cancelGestureResume() {
+    if (!resumeOnGesture) return;
+
+    for (const eventName of ["pointerdown", "keydown", "touchstart"]) {
+      window.removeEventListener(eventName, resumeOnGesture, true);
+    }
+    resumeOnGesture = null;
+  }
+
+  function scheduleGestureResume() {
+    if (resumeOnGesture) return;
+
+    resumeOnGesture = async (event) => {
+      if (event?.target?.closest?.(".bgm-dock, .bgm-prompt")) return;
+
+      cancelGestureResume();
+      if (!audio.src || !audio.paused || localStorage.getItem(enabledKey) !== "1") return;
+
+      try {
+        await audio.play();
+        updatePlayingState(true);
+        setStatus(currentTrack?.artist || "正在继续播放");
+        writePlaybackState({ playing: true });
+      } catch (error) {
+        setStatus(describeAudioError(error));
+        writePlaybackState({ playing: true });
+        scheduleGestureResume();
+      }
+    };
+
+    for (const eventName of ["pointerdown", "keydown", "touchstart"]) {
+      window.addEventListener(eventName, resumeOnGesture, true);
+    }
+  }
+
   async function restoreSavedPlayback() {
     const state = readPlaybackState();
     if (!state?.playing || localStorage.getItem(enabledKey) !== "1") return false;
@@ -220,9 +257,13 @@
       await audio.play();
       updatePlayingState(true);
       writePlaybackState({ playing: true });
+      cancelGestureResume();
     } catch (error) {
       updatePlayingState(false, { remember: false });
-      setStatus(describeAudioError(error));
+      localStorage.setItem(enabledKey, "1");
+      setStatus(error?.name === "NotAllowedError" ? "点击页面继续播放" : describeAudioError(error));
+      writePlaybackState({ playing: true });
+      scheduleGestureResume();
     }
 
     return true;
@@ -296,7 +337,9 @@
     }
 
     if (!audio.paused) {
+      isUserPausing = true;
       audio.pause();
+      cancelGestureResume();
       updatePlayingState(false);
       setStatus("已暂停");
       return;
@@ -402,12 +445,30 @@
   nextButton?.addEventListener("click", playRandomTrack);
   audio.addEventListener("ended", playRandomTrack);
   audio.addEventListener("pause", () => {
+    if (isUserPausing) {
+      isUserPausing = false;
+      updatePlayingState(false);
+      writePlaybackState({ playing: false });
+      return;
+    }
+
     if (!audio.ended && !isPageUnloading) {
+      if (localStorage.getItem(enabledKey) === "1") {
+        if (document.visibilityState !== "hidden") {
+          setStatus("点击页面继续播放");
+          scheduleGestureResume();
+        }
+        writePlaybackState({ playing: true });
+        return;
+      }
+
+      cancelGestureResume();
       updatePlayingState(false);
       writePlaybackState({ playing: false });
     }
   });
   audio.addEventListener("play", () => {
+    cancelGestureResume();
     writePlaybackState({ playing: true });
   });
   audio.addEventListener("volumechange", () => {
@@ -428,10 +489,19 @@
 
   function prepareForPageExit() {
     isPageUnloading = true;
-    writePlaybackState({ playing: !audio.paused && !audio.ended });
+    writePlaybackState({
+      playing: localStorage.getItem(enabledKey) === "1" && (!audio.ended || Boolean(resumeOnGesture)),
+    });
     if (isPromptQuietPage()) {
       sessionStorage.setItem(suppressPromptKey, "1");
     }
+  }
+
+  function rememberActivePlaybackBeforeHidden() {
+    if (document.visibilityState !== "hidden") return;
+    if (localStorage.getItem(enabledKey) !== "1" || audio.ended) return;
+
+    writePlaybackState({ playing: true });
   }
 
   window.GlassBlogBgm = {
@@ -449,6 +519,8 @@
   window.addEventListener("beforeunload", () => {
     prepareForPageExit();
   });
+
+  document.addEventListener("visibilitychange", rememberActivePlaybackBeforeHidden);
 
   loadPlaylist();
 })();
