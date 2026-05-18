@@ -2,7 +2,7 @@
   const playlistUrl = "./assets/music/playlist.json?v=20260518-bgm";
   const enabledKey = "glass-blog-bgm-enabled";
   const stateKey = "glass-blog-bgm-state";
-  const suppressPromptKey = "glass-blog-bgm-suppress-next-prompt";
+  const suppressPromptKey = "glass-blog-bgm-suppress-next-prompt-v2";
   const volumeKey = "glass-blog-bgm-volume";
   const defaultVolume = 0.42;
   const restoreMaxAge = 12 * 60 * 60 * 1000;
@@ -123,7 +123,7 @@
   }
 
   function isPromptQuietPage() {
-    return promptQuietPages.has(currentPageName());
+    return promptQuietPages.has(currentPageName()) || document.body.classList.contains("is-soft-page");
   }
 
   function resolveSrc(src) {
@@ -362,7 +362,11 @@
 
   function showPrompt() {
     if (prompt || !tracks.length || !audio.paused || localStorage.getItem(enabledKey) === "1") return;
-    if (!isHomePage() || isPromptQuietPage()) return;
+    if (isPromptQuietPage()) {
+      closePrompt();
+      return;
+    }
+    if (!isHomePage()) return;
     if (sessionStorage.getItem(suppressPromptKey) === "1") {
       sessionStorage.removeItem(suppressPromptKey);
       return;
@@ -425,8 +429,18 @@
   function prepareForPageExit() {
     isPageUnloading = true;
     writePlaybackState({ playing: !audio.paused && !audio.ended });
-    sessionStorage.setItem(suppressPromptKey, "1");
+    if (isPromptQuietPage()) {
+      sessionStorage.setItem(suppressPromptKey, "1");
+    }
   }
+
+  window.GlassBlogBgm = {
+    closePrompt,
+    suppressNextPrompt() {
+      sessionStorage.setItem(suppressPromptKey, "1");
+      closePrompt();
+    },
+  };
 
   window.addEventListener("pagehide", () => {
     prepareForPageExit();

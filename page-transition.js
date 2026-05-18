@@ -129,7 +129,7 @@
   function finishSoftPage(page) {
     document.body.classList.add("is-soft-page");
     setNavCurrent(page);
-    window.GlassBlogBgm?.closePrompt?.();
+    window.GlassBlogBgm?.suppressNextPrompt?.();
     window.GlassBlogAuth?.syncAuthorUi?.();
     window.GlassBlogAuth?.initLoginPage?.();
     window.scrollTo({ top: 0, behavior: "instant" });
