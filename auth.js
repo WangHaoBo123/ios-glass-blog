@@ -238,6 +238,8 @@
     const account = getAccount();
     const signedIn = isSignedIn();
     const canSetup = isLocalPreview();
+    const bound = page.dataset.authBound === "true";
+    page.dataset.authBound = "true";
 
     if (signedIn) {
       setAuthStatus("已经登录，正在进入作者后台。", "success");
@@ -252,6 +254,8 @@
     if (loginForm) loginForm.hidden = remoteConfigured ? false : !account;
     if (lockedPanel) lockedPanel.hidden = remoteConfigured || Boolean(account) || canSetup;
     if (resetButton) resetButton.hidden = remoteConfigured || !account || !canSetup;
+
+    if (bound) return;
 
     setupForm?.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -325,6 +329,7 @@
   window.GlassBlogAuth = {
     createAccount,
     getAccount,
+    initLoginPage,
     isLocalPreview,
     isSignedIn,
     requireAuthor,

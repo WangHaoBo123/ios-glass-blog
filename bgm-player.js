@@ -1,8 +1,12 @@
 (function () {
   const playlistUrl = "./assets/music/playlist.json?v=20260518-bgm";
   const enabledKey = "glass-blog-bgm-enabled";
+  const stateKey = "glass-blog-bgm-state";
+  const suppressPromptKey = "glass-blog-bgm-suppress-next-prompt";
   const volumeKey = "glass-blog-bgm-volume";
   const defaultVolume = 0.42;
+  const restoreMaxAge = 12 * 60 * 60 * 1000;
+  const promptQuietPages = new Set(["about.html", "login.html", "compose.html", "manage.html"]);
   const fallbackTracks = [
     {
       title: "The Song of Destiny",
@@ -23,7 +27,10 @@
 
   let tracks = [];
   let currentIndex = -1;
+  let currentTrack = null;
   let isReady = false;
+  let isPageUnloading = false;
+  let lastStateWriteSecond = -1;
   let prompt = null;
 
   const audio = document.createElement("audio");
@@ -107,11 +114,127 @@
     return messages[mediaError.code] || "播放失败，请再点一次";
   }
 
-  function updatePlayingState(isPlaying) {
+  function currentPageName() {
+    return (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+  }
+
+  function isHomePage() {
+    return currentPageName() === "index.html";
+  }
+
+  function isPromptQuietPage() {
+    return promptQuietPages.has(currentPageName());
+  }
+
+  function resolveSrc(src) {
+    try {
+      return new URL(src, window.location.href).href;
+    } catch {
+      return String(src || "");
+    }
+  }
+
+  function sameSrc(left, right) {
+    return resolveSrc(left) === resolveSrc(right);
+  }
+
+  function findTrackBySrc(src) {
+    return tracks.find((track) => sameSrc(track.src, src)) || null;
+  }
+
+  function setCurrentTrack(track) {
+    currentTrack = track || null;
+    currentIndex = currentTrack ? tracks.findIndex((item) => sameSrc(item.src, currentTrack.src)) : -1;
+  }
+
+  function readPlaybackState() {
+    try {
+      const state = JSON.parse(sessionStorage.getItem(stateKey) || "null");
+      if (!state || typeof state !== "object" || !state.src) return null;
+      if (Date.now() - Number(state.savedAt || 0) > restoreMaxAge) return null;
+      return state;
+    } catch {
+      sessionStorage.removeItem(stateKey);
+      return null;
+    }
+  }
+
+  function writePlaybackState(overrides = {}) {
+    const track = currentTrack || findTrackBySrc(audio.getAttribute("src") || audio.src);
+    if (!track && !audio.src) return;
+
+    const state = {
+      src: track?.src || audio.getAttribute("src") || audio.src,
+      title: track?.title || title?.textContent || "Background music",
+      artist: track?.artist || status?.textContent || "Local playlist",
+      currentTime: Number.isFinite(audio.currentTime) ? audio.currentTime : 0,
+      volume: audio.volume,
+      playing: !audio.paused && !audio.ended,
+      savedAt: Date.now(),
+      ...overrides,
+    };
+
+    sessionStorage.setItem(stateKey, JSON.stringify(state));
+  }
+
+  function restorePlaybackTime(time) {
+    const savedTime = Number(time);
+    if (!Number.isFinite(savedTime) || savedTime <= 0) return;
+
+    const applyTime = () => {
+      try {
+        const maxTime = Number.isFinite(audio.duration) && audio.duration > 1
+          ? Math.max(0, audio.duration - 0.5)
+          : savedTime;
+        audio.currentTime = Math.min(savedTime, maxTime);
+      } catch {
+        // Some browsers reject early currentTime writes until metadata is ready.
+      }
+    };
+
+    if (audio.readyState >= 1) {
+      applyTime();
+      return;
+    }
+
+    audio.addEventListener("loadedmetadata", applyTime, { once: true });
+  }
+
+  async function restoreSavedPlayback() {
+    const state = readPlaybackState();
+    if (!state?.playing || localStorage.getItem(enabledKey) !== "1") return false;
+
+    const track = findTrackBySrc(state.src) || normalizeTrack(state);
+    if (!track) return false;
+
+    setCurrentTrack(track);
+    audio.src = track.src;
+    if (Number.isFinite(Number(state.volume))) {
+      audio.volume = Math.min(1, Math.max(0, Number(state.volume)));
+    }
+    setTitle(track.title);
+    setStatus(track.artist || "正在继续播放");
+    restorePlaybackTime(state.currentTime);
+
+    try {
+      await audio.play();
+      updatePlayingState(true);
+      writePlaybackState({ playing: true });
+    } catch (error) {
+      updatePlayingState(false, { remember: false });
+      setStatus(describeAudioError(error));
+    }
+
+    return true;
+  }
+
+  function updatePlayingState(isPlaying, options = {}) {
     dock.classList.toggle("is-playing", isPlaying);
     toggleButton?.setAttribute("aria-pressed", String(isPlaying));
     toggleButton?.setAttribute("aria-label", isPlaying ? "暂停背景音乐" : "播放背景音乐");
-    localStorage.setItem(enabledKey, isPlaying ? "1" : "0");
+    if (options.remember !== false) {
+      localStorage.setItem(enabledKey, isPlaying ? "1" : "0");
+    }
   }
 
   function pickRandomTrack() {
@@ -137,13 +260,16 @@
       return;
     }
 
+    setCurrentTrack(track);
     audio.src = track.src;
     setTitle(track.title);
     setStatus(track.artist);
+    writePlaybackState({ playing: false, currentTime: 0 });
 
     try {
       await audio.play();
       updatePlayingState(true);
+      writePlaybackState({ playing: true });
     } catch (error) {
       updatePlayingState(false);
       setStatus(describeAudioError(error));
@@ -185,6 +311,7 @@
       await audio.play();
       updatePlayingState(true);
       setStatus(tracks[currentIndex]?.artist || "正在播放");
+      writePlaybackState({ playing: true });
     } catch (error) {
       updatePlayingState(false);
       setStatus(describeAudioError(error));
@@ -222,6 +349,10 @@
     setTitle(`${tracks.length} tracks`);
     setStatus(window.location.protocol === "file:" ? "点击播放本地音乐" : "点击随机播放");
 
+    if (await restoreSavedPlayback()) {
+      return;
+    }
+
     if (localStorage.getItem(enabledKey) === "1") {
       setStatus("点击继续播放");
     }
@@ -230,7 +361,12 @@
   }
 
   function showPrompt() {
-    if (prompt || !tracks.length || !audio.paused) return;
+    if (prompt || !tracks.length || !audio.paused || localStorage.getItem(enabledKey) === "1") return;
+    if (!isHomePage() || isPromptQuietPage()) return;
+    if (sessionStorage.getItem(suppressPromptKey) === "1") {
+      sessionStorage.removeItem(suppressPromptKey);
+      return;
+    }
 
     prompt = document.createElement("div");
     prompt.className = "bgm-prompt";
@@ -262,14 +398,42 @@
   nextButton?.addEventListener("click", playRandomTrack);
   audio.addEventListener("ended", playRandomTrack);
   audio.addEventListener("pause", () => {
-    if (!audio.ended) updatePlayingState(false);
+    if (!audio.ended && !isPageUnloading) {
+      updatePlayingState(false);
+      writePlaybackState({ playing: false });
+    }
+  });
+  audio.addEventListener("play", () => {
+    writePlaybackState({ playing: true });
   });
   audio.addEventListener("volumechange", () => {
     localStorage.setItem(volumeKey, String(audio.volume));
+    writePlaybackState();
   });
   audio.addEventListener("error", () => {
     updatePlayingState(false);
     setStatus(describeAudioError());
+  });
+  audio.addEventListener("timeupdate", () => {
+    const second = Math.floor(audio.currentTime);
+    if (second > 0 && second % 3 === 0 && second !== lastStateWriteSecond) {
+      lastStateWriteSecond = second;
+      writePlaybackState();
+    }
+  });
+
+  function prepareForPageExit() {
+    isPageUnloading = true;
+    writePlaybackState({ playing: !audio.paused && !audio.ended });
+    sessionStorage.setItem(suppressPromptKey, "1");
+  }
+
+  window.addEventListener("pagehide", () => {
+    prepareForPageExit();
+  });
+
+  window.addEventListener("beforeunload", () => {
+    prepareForPageExit();
   });
 
   loadPlaylist();

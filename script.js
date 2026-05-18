@@ -984,6 +984,12 @@ function routeWithTransition() {
   route();
 }
 
+window.GlassBlogApp = {
+  route,
+  routeWithTransition,
+  syncChromeState,
+};
+
 function scrollToArticleHeading(target) {
   if (!target) return;
   const headerHeight = document.querySelector(".site-header")?.getBoundingClientRect().height || 0;
