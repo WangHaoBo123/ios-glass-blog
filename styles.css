@@ -2132,25 +2132,27 @@ h1 {
 .bgm-prompt-card {
   position: relative;
   display: grid;
-  grid-template-columns: 62px minmax(0, 1fr) auto;
-  gap: 20px;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  gap: 16px;
   align-items: center;
-  width: min(620px, calc(100vw - 34px));
-  min-height: 136px;
-  padding: 26px;
+  width: min(420px, calc(100vw - 34px));
+  min-height: 260px;
+  padding: 30px 28px;
   overflow: hidden;
   color: var(--text);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-bottom-color: rgba(0, 0, 0, 0.24);
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom-color: rgba(0, 0, 0, 0.18);
   border-radius: var(--radius);
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.23), rgba(255, 255, 255, 0.06)),
-    rgba(21, 22, 25, 0.66);
+    linear-gradient(145deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.045)),
+    rgba(21, 22, 25, 0.48);
   box-shadow:
-    0 24px 62px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.42);
-  backdrop-filter: blur(28px) saturate(160%);
-  -webkit-backdrop-filter: blur(28px) saturate(160%);
+    0 26px 70px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(32px) saturate(150%);
+  -webkit-backdrop-filter: blur(32px) saturate(150%);
   transform: translateY(18px) scale(0.975);
   transition:
     transform 260ms ease,
@@ -2170,9 +2172,9 @@ h1 {
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(112deg, transparent 0 28%, rgba(255, 255, 255, 0.14) 42%, transparent 58% 100%);
+    linear-gradient(112deg, transparent 0 30%, rgba(255, 255, 255, 0.1) 44%, transparent 60% 100%);
   content: "";
-  opacity: 0.8;
+  opacity: 0.62;
   transform: translateX(-34%);
 }
 
@@ -2219,6 +2221,7 @@ h1 {
   z-index: 1;
   display: grid;
   gap: 8px;
+  justify-items: center;
   min-width: 0;
 }
 
@@ -2228,7 +2231,7 @@ h1 {
 }
 
 .bgm-prompt-copy span {
-  color: var(--muted-strong);
+  color: rgba(255, 255, 255, 0.52);
   font-size: 15px;
   line-height: 1.55;
 }
@@ -4670,15 +4673,16 @@ body.is-reading-post .bgm-dock {
   }
 
   .bgm-prompt-card {
-    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-columns: 1fr;
     gap: 14px;
-    min-height: 150px;
-    padding: 18px;
+    width: min(360px, calc(100vw - 30px));
+    min-height: 222px;
+    padding: 24px 22px;
   }
 
   .bgm-prompt-mark {
-    width: 44px;
-    height: 44px;
+    width: 50px;
+    height: 50px;
   }
 
   .bgm-prompt-copy strong {
@@ -4686,8 +4690,7 @@ body.is-reading-post .bgm-dock {
   }
 
   .bgm-prompt-play {
-    grid-column: 1 / -1;
-    width: 100%;
+    width: min(160px, 100%);
   }
 
   .reader-toc-head {
