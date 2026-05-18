@@ -1,6 +1,7 @@
 (function () {
   const playlistUrl = "./assets/music/playlist.json?v=20260518-bgm";
   const enabledKey = "glass-blog-bgm-enabled";
+  const promptClosedKey = "glass-blog-bgm-prompt-closed";
   const volumeKey = "glass-blog-bgm-volume";
   const defaultVolume = 0.42;
   const fallbackTracks = [
@@ -24,6 +25,7 @@
   let tracks = [];
   let currentIndex = -1;
   let isReady = false;
+  let prompt = null;
 
   const audio = document.createElement("audio");
   audio.className = "bgm-audio";
@@ -55,6 +57,17 @@
   const nextButton = dock.querySelector("[data-bgm-next]");
   const title = dock.querySelector("[data-bgm-title]");
   const status = dock.querySelector("[data-bgm-status]");
+
+  function closePrompt() {
+    if (!prompt) return;
+
+    prompt.classList.add("is-leaving");
+    sessionStorage.setItem(promptClosedKey, "1");
+    window.setTimeout(() => {
+      prompt?.remove();
+      prompt = null;
+    }, 240);
+  }
 
   function setStatus(message) {
     if (status) status.textContent = message;
@@ -139,7 +152,14 @@
     }
   }
 
+  async function acceptPromptPlayback() {
+    closePrompt();
+    await playRandomTrack();
+  }
+
   async function togglePlayback() {
+    closePrompt();
+
     if (!isReady) {
       setStatus("歌单还在读取");
       return;
@@ -207,6 +227,36 @@
     if (localStorage.getItem(enabledKey) === "1") {
       setStatus("点击继续播放");
     }
+
+    showPrompt();
+  }
+
+  function showPrompt() {
+    if (prompt || !tracks.length || sessionStorage.getItem(promptClosedKey) === "1") return;
+
+    prompt = document.createElement("div");
+    prompt.className = "bgm-prompt";
+    prompt.setAttribute("role", "dialog");
+    prompt.setAttribute("aria-modal", "false");
+    prompt.setAttribute("aria-labelledby", "bgm-prompt-title");
+    prompt.innerHTML = `
+      <div class="bgm-prompt-card">
+        <span class="bgm-prompt-mark" aria-hidden="true"></span>
+        <div class="bgm-prompt-copy">
+          <strong id="bgm-prompt-title">播放背景音乐吗？</strong>
+          <span>点击播放开启随机歌单；点击窗口外任意位置可关闭。</span>
+        </div>
+        <button class="bgm-prompt-play" type="button" data-bgm-prompt-play>播放</button>
+      </div>
+    `;
+
+    document.body.append(prompt);
+    window.requestAnimationFrame(() => prompt?.classList.add("is-visible"));
+
+    prompt.addEventListener("click", (event) => {
+      if (event.target === prompt) closePrompt();
+    });
+    prompt.querySelector("[data-bgm-prompt-play]")?.addEventListener("click", acceptPromptPlayback);
   }
 
   toggleButton?.addEventListener("click", togglePlayback);
