@@ -517,7 +517,9 @@ function renderFilters() {
     ...categories.map((category) => ({ label: category, value: category })),
   ];
 
-  filterList.innerHTML = filters
+  filterList.innerHTML = `
+    <span class="segment-indicator" aria-hidden="true"></span>
+    ${filters
     .map(
       (filter) => `
         <button
@@ -531,7 +533,29 @@ function renderFilters() {
         </button>
       `,
     )
-    .join("");
+    .join("")}
+  `;
+
+  syncSegmentIndicator(false);
+}
+
+function syncSegmentIndicator(animate = true) {
+  if (!filterList) return;
+
+  const indicator = filterList.querySelector(".segment-indicator");
+  const activeSegment = filterList.querySelector(".segment.is-active");
+  if (!indicator || !activeSegment) return;
+
+  const listRect = filterList.getBoundingClientRect();
+  const activeRect = activeSegment.getBoundingClientRect();
+  const x = activeRect.left - listRect.left;
+  const y = activeRect.top - listRect.top;
+
+  indicator.style.setProperty("--segment-x", `${x}px`);
+  indicator.style.setProperty("--segment-y", `${y}px`);
+  indicator.style.setProperty("--segment-width", `${activeRect.width}px`);
+  indicator.style.setProperty("--segment-height", `${activeRect.height}px`);
+  indicator.classList.toggle("is-ready", animate);
 }
 
 function renderMeta(post) {
@@ -729,6 +753,7 @@ function renderListWithMotion() {
 
   if (reduceMotion || !hasRenderedList) {
     renderList();
+    syncSegmentIndicator(false);
     return;
   }
 
@@ -740,6 +765,7 @@ function renderListWithMotion() {
 
   listTransitionTimer = window.setTimeout(() => {
     renderList();
+    syncSegmentIndicator();
     containers.forEach((container) => {
       container.classList.remove("is-list-leaving");
       container.classList.add("is-list-entering");
@@ -1107,6 +1133,7 @@ filterList?.addEventListener("click", (event) => {
     item.classList.toggle("is-active", isActive);
     item.setAttribute("aria-selected", String(isActive));
   });
+  syncSegmentIndicator();
 
   if (window.location.hash.startsWith("#post/")) {
     window.location.hash = "#articles";
@@ -1127,6 +1154,7 @@ searchInput?.addEventListener("input", () => {
 window.addEventListener("hashchange", routeWithTransition);
 window.addEventListener("scroll", syncChromeState, { passive: true });
 window.addEventListener("resize", syncChromeState);
+window.addEventListener("resize", () => syncSegmentIndicator(false));
 
 document.addEventListener("click", async (event) => {
   const previewClose = event.target.closest("[data-image-preview-close]");
