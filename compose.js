@@ -39,6 +39,9 @@ const fileName = document.querySelector("[data-file-name]");
 const checkTitle = document.querySelector("[data-check-title]");
 const checkSummary = document.querySelector("[data-check-summary]");
 const checkTags = document.querySelector("[data-check-tags]");
+const editorOutlineList = document.querySelector("[data-editor-outline-list]");
+const editorOutlineCount = document.querySelector("[data-editor-outline-count]");
+const editorOutlineEmpty = document.querySelector("[data-editor-outline-empty]");
 const viewButtons = [...document.querySelectorAll("[data-editor-view]")];
 const viewPanels = [...document.querySelectorAll("[data-view-panel]")];
 const markdownButtons = [...document.querySelectorAll("[data-md]")];
@@ -71,6 +74,26 @@ const emojiGroups = [
   { label: "装饰", items: ["❤️", "🖤", "🤍", "⭐", "🌟", "💫", "🌈", "❄️", "🌊", "🌿", "🎧", "🧊"] },
 ];
 let emojiPanel = null;
+let slashMenu = null;
+let slashMenuList = null;
+let slashContext = null;
+let slashItems = [];
+let slashActiveIndex = 0;
+let slashQuery = "";
+const slashCommands = [
+  { id: "h1", title: "一级标题", description: "插入文章主标题", shortcut: "H1", keywords: "h1 title heading 标题 一级" },
+  { id: "h2", title: "二级标题", description: "插入章节标题", shortcut: "H2", keywords: "h2 heading 标题 二级" },
+  { id: "h3", title: "三级标题", description: "插入小节标题", shortcut: "H3", keywords: "h3 heading 标题 三级" },
+  { id: "h4", title: "四级标题", description: "插入更细一级的小标题", shortcut: "H4", keywords: "h4 heading 标题 四级" },
+  { id: "bold", title: "加粗", description: "强调当前文字", shortcut: "B", keywords: "bold strong 加粗 强调" },
+  { id: "highlight", title: "荧光笔", description: "标出重点句子", shortcut: "HL", keywords: "highlight mark 荧光笔 高亮 重点" },
+  { id: "quote", title: "引用", description: "插入引用段落", shortcut: ">", keywords: "quote blockquote 引用" },
+  { id: "list", title: "列表", description: "插入项目列表", shortcut: "LIST", keywords: "list bullet 列表 项目" },
+  { id: "codeblock", title: "代码块", description: "插入多行代码区域", shortcut: "{ }", keywords: "code block 代码 代码块" },
+  { id: "link", title: "链接", description: "插入一段可点击链接", shortcut: "LINK", keywords: "link url 链接 超链接" },
+  { id: "emoji", title: "Emoji", description: "打开表情面板", shortcut: ":)", keywords: "emoji 表情" },
+  { id: "image", title: "图片", description: "导入图片并插入到当前位置", shortcut: "IMG", keywords: "image photo 图片 插图 上传" },
+];
 
 function escapeHtml(value) {
   return String(value)
@@ -415,6 +438,10 @@ function setEditorView(view) {
   if (form) {
     form.hidden = view !== "write";
   }
+
+  if (view !== "write") {
+    closeSlashMenu();
+  }
 }
 
 function setCheck(element, isDone) {
@@ -482,6 +509,7 @@ function update() {
   updateStats(draft);
   updatePublishState(draft);
   setAutosaveState();
+  renderEditorOutline();
 
   try {
     localStorage.setItem(draftKey, JSON.stringify(draft));
@@ -823,6 +851,267 @@ function toggleEmojiPanel() {
   emojiToggleButton?.setAttribute("aria-expanded", String(shouldOpen));
 }
 
+function createSlashMenu() {
+  if (slashMenu) return slashMenu;
+
+  slashMenu = document.createElement("div");
+  slashMenu.className = "editor-command-menu";
+  slashMenu.hidden = true;
+  slashMenu.setAttribute("data-editor-command-menu", "");
+  slashMenu.innerHTML = `
+    <div class="editor-command-head">
+      <strong>Slash Command</strong>
+      <span>输入 /h、/li、/im 这样的缩写可以快速筛选</span>
+    </div>
+    <div class="editor-command-list" data-editor-command-list></div>
+  `;
+  slashMenuList = slashMenu.querySelector("[data-editor-command-list]");
+  slashMenu.addEventListener("mousedown", (event) => {
+    event.preventDefault();
+  });
+  document.body.append(slashMenu);
+  return slashMenu;
+}
+
+function getSlashMatches(query = "") {
+  const keyword = String(query || "").trim().toLowerCase();
+  if (!keyword) return slashCommands;
+
+  return slashCommands.filter((command) => {
+    const haystack = `${command.id} ${command.title} ${command.description} ${command.keywords}`.toLowerCase();
+    return haystack.includes(keyword);
+  });
+}
+
+function getSlashContext() {
+  const textarea = mediaEditor?.activeTextArea?.();
+  if (!textarea) return null;
+
+  const selectionStart = textarea.selectionStart ?? 0;
+  const selectionEnd = textarea.selectionEnd ?? selectionStart;
+  if (selectionStart !== selectionEnd) return null;
+
+  const value = textarea.value || "";
+  const lineStart = value.lastIndexOf("\n", Math.max(0, selectionStart - 1)) + 1;
+  const nextBreak = value.indexOf("\n", selectionStart);
+  const lineEnd = nextBreak === -1 ? value.length : nextBreak;
+  const line = value.slice(lineStart, lineEnd);
+  const prefix = line.slice(0, selectionStart - lineStart);
+  const match = prefix.match(/^(\s*)\/([^\s]*)$/);
+
+  if (!match) return null;
+  if (!/^\/[^\s]*$/.test(line.trim())) return null;
+
+  return {
+    textarea,
+    index: Number(textarea.dataset.blockIndex),
+    lineStart,
+    lineEnd,
+    start: selectionStart,
+    end: selectionEnd,
+    indent: match[1] || "",
+    query: match[2].toLowerCase(),
+  };
+}
+
+function positionSlashMenu() {
+  if (!slashMenu || slashMenu.hidden || !slashContext?.textarea) return;
+
+  const textarea = slashContext.textarea;
+  const rect = textarea.getBoundingClientRect();
+  const styles = window.getComputedStyle(textarea);
+  const lineHeight = parseFloat(styles.lineHeight) || 34;
+  const paddingTop = parseFloat(styles.paddingTop) || 0;
+  const lineIndex = (textarea.value.slice(0, slashContext.start).match(/\n/g) || []).length;
+  const anchorY = rect.top + paddingTop + lineIndex * lineHeight - textarea.scrollTop;
+  let top = anchorY + lineHeight + 12;
+  let left = rect.left + 10;
+
+  const menuHeight = Math.min(260, window.innerHeight * 0.52);
+  if (top + menuHeight > window.innerHeight - 18) {
+    top = anchorY - menuHeight - 12;
+  }
+
+  top = Math.max(18, top);
+  left = Math.max(18, Math.min(left, window.innerWidth - 338));
+  slashMenu.style.top = `${top}px`;
+  slashMenu.style.left = `${left}px`;
+}
+
+function renderSlashMenu() {
+  const panel = createSlashMenu();
+  slashItems = getSlashMatches(slashContext?.query || "");
+  slashActiveIndex = slashItems.length ? Math.min(slashActiveIndex, slashItems.length - 1) : 0;
+
+  if (!slashMenuList) return;
+
+  if (!slashItems.length) {
+    slashMenuList.innerHTML = `
+      <div class="editor-command-item" aria-hidden="true">
+        <span class="editor-command-label">
+          <span class="editor-command-title">没有找到对应命令</span>
+          <span class="editor-command-description">试试 /h、/list、/image 这些缩写</span>
+        </span>
+      </div>
+    `;
+  } else {
+    slashMenuList.innerHTML = slashItems
+      .map(
+        (command, index) => `
+          <button
+            class="editor-command-item${index === slashActiveIndex ? " is-active" : ""}"
+            type="button"
+            data-editor-command="${escapeHtml(command.id)}"
+          >
+            <span class="editor-command-label">
+              <span class="editor-command-title">${escapeHtml(command.title)}</span>
+              <span class="editor-command-description">${escapeHtml(command.description)}</span>
+            </span>
+            <span class="editor-command-key">${escapeHtml(command.shortcut)}</span>
+          </button>
+        `,
+      )
+      .join("");
+  }
+
+  panel.hidden = false;
+  requestAnimationFrame(positionSlashMenu);
+}
+
+function closeSlashMenu() {
+  if (!slashMenu) return;
+  slashMenu.hidden = true;
+  slashContext = null;
+  slashItems = [];
+  slashQuery = "";
+}
+
+function syncSlashMenuState() {
+  const context = getSlashContext();
+  if (!context) {
+    closeSlashMenu();
+    return;
+  }
+
+  if (context.query !== slashQuery) {
+    slashActiveIndex = 0;
+  }
+
+  slashQuery = context.query;
+  slashContext = context;
+  renderSlashMenu();
+}
+
+function removeSlashToken() {
+  const context = slashContext || getSlashContext();
+  if (!context) return false;
+
+  const value = context.textarea.value || "";
+  const replacement = context.indent;
+  const cursor = context.lineStart + replacement.length;
+  mediaEditor?.replaceText(
+    context.index,
+    `${value.slice(0, context.lineStart)}${replacement}${value.slice(context.lineEnd)}`,
+    cursor,
+    cursor,
+  );
+  return true;
+}
+
+function applySlashCommand(commandId) {
+  const command = slashCommands.find((item) => item.id === commandId);
+  if (!command) return;
+
+  removeSlashToken();
+  closeSlashMenu();
+
+  if (command.id === "image") {
+    importImageButton?.click();
+    return;
+  }
+
+  insertMarkdown(command.id);
+}
+
+function handleSlashMenuKeydown(event) {
+  if (!slashMenu || slashMenu.hidden) return false;
+
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeSlashMenu();
+    return true;
+  }
+
+  if (!slashItems.length) return false;
+
+  if (event.key === "ArrowDown") {
+    event.preventDefault();
+    slashActiveIndex = (slashActiveIndex + 1) % slashItems.length;
+    renderSlashMenu();
+    return true;
+  }
+
+  if (event.key === "ArrowUp") {
+    event.preventDefault();
+    slashActiveIndex = (slashActiveIndex - 1 + slashItems.length) % slashItems.length;
+    renderSlashMenu();
+    return true;
+  }
+
+  if (event.key === "Enter" || event.key === "Tab") {
+    event.preventDefault();
+    applySlashCommand(slashItems[slashActiveIndex].id);
+    return true;
+  }
+
+  return false;
+}
+
+function renderEditorOutline() {
+  const headings = mediaEditor?.getOutlineHeadings?.() || [];
+  const activeHeadingId = mediaEditor?.getActiveHeadingId?.() || "";
+
+  if (editorOutlineCount) {
+    editorOutlineCount.textContent = `${headings.length} 节`;
+  }
+
+  if (editorOutlineEmpty) {
+    editorOutlineEmpty.hidden = headings.length > 0;
+  }
+
+  if (!editorOutlineList) return;
+
+  if (!headings.length) {
+    editorOutlineList.innerHTML = "";
+    return;
+  }
+
+  editorOutlineList.innerHTML = headings
+    .map(
+      (heading) => `
+        <button
+          class="editor-outline-link${heading.id === activeHeadingId ? " is-active" : ""}"
+          type="button"
+          data-outline-id="${escapeHtml(heading.id)}"
+          data-level="${heading.level}"
+        >
+          <span class="editor-outline-kicker">H${heading.level}</span>
+          <span class="editor-outline-text">${escapeHtml(heading.text)}</span>
+        </button>
+      `,
+    )
+    .join("");
+}
+
+function focusOutlineHeading(id) {
+  const heading = (mediaEditor?.getOutlineHeadings?.() || []).find((item) => item.id === id);
+  if (!heading) return;
+
+  mediaEditor?.focusHeading?.(heading);
+  renderEditorOutline();
+  syncSlashMenuState();
+}
+
 function shortcutDigit(event) {
   const digitFromCode = event.code?.match(/^Digit([1-4])$/)?.[1];
   return digitFromCode || (["1", "2", "3", "4"].includes(event.key) ? event.key : "");
@@ -965,7 +1254,11 @@ mediaEditor = window.GlassBlogMediaEditor?.create({
   dropTarget: editorCanvas,
   assetFolderButton: connectAssetsButton,
   filenamePrefixProvider: () => slugInput?.value || slugify(titleInput?.value || "post", dateInput?.value || today()),
-  onChange: scheduleUpdate,
+  onChange: () => {
+    renderEditorOutline();
+    syncSlashMenuState();
+    scheduleUpdate();
+  },
   onStatus: setStatus,
 });
 mediaEditor?.setValue(contentInput?.value || "", legacyImages);
@@ -1019,7 +1312,37 @@ imageInput?.addEventListener("change", () => {
     imageInput.value = "";
   });
 });
+mediaFlow?.addEventListener("input", () => {
+  renderEditorOutline();
+  syncSlashMenuState();
+});
+mediaFlow?.addEventListener("keyup", () => {
+  renderEditorOutline();
+  syncSlashMenuState();
+});
+mediaFlow?.addEventListener("click", () => {
+  renderEditorOutline();
+  syncSlashMenuState();
+});
+mediaFlow?.addEventListener("focusin", () => {
+  renderEditorOutline();
+  syncSlashMenuState();
+});
+window.addEventListener("resize", positionSlashMenu);
+window.addEventListener("scroll", positionSlashMenu, true);
 document.addEventListener("click", async (event) => {
+  const outlineButton = event.target.closest("[data-outline-id]");
+  if (outlineButton) {
+    focusOutlineHeading(outlineButton.dataset.outlineId);
+    return;
+  }
+
+  const slashButton = event.target.closest("[data-editor-command]");
+  if (slashButton) {
+    applySlashCommand(slashButton.dataset.editorCommand);
+    return;
+  }
+
   const emojiButton = event.target.closest("[data-emoji]");
   if (emojiButton) {
     insertPlainText(emojiButton.dataset.emoji);
@@ -1030,6 +1353,10 @@ document.addEventListener("click", async (event) => {
 
   if (emojiPanel && !emojiPanel.hidden && !event.target.closest("[data-emoji-panel], [data-emoji-toggle]")) {
     closeEmojiPanel();
+  }
+
+  if (slashMenu && !slashMenu.hidden && !event.target.closest("[data-editor-command-menu]") && !event.target.closest("[data-media-flow]")) {
+    closeSlashMenu();
   }
 
   const openDraftButton = event.target.closest("[data-open-draft]");
@@ -1068,6 +1395,10 @@ document.addEventListener("click", async (event) => {
 });
 document.addEventListener("keydown", (event) => {
   if (event.isComposing) return;
+
+  if (handleSlashMenuKeydown(event)) {
+    return;
+  }
 
   if (event.key === "Escape" && emojiPanel && !emojiPanel.hidden) {
     closeEmojiPanel();

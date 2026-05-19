@@ -247,6 +247,11 @@
       this.activeBlockIndex = 0;
       this.uploadsDirectoryHandle = null;
       this.pendingUploads = new Map();
+      this.dropIndicator = document.createElement("div");
+      this.dropIndicator.className = "media-drop-indicator";
+      this.dropIndicator.setAttribute("aria-hidden", "true");
+      this.dropIndicator.hidden = true;
+      this.dropIndicatorTimer = 0;
 
       this.source?.classList.add("is-source-hidden");
       this.render();
@@ -324,6 +329,7 @@
         this.root.querySelectorAll(".media-block.is-dragging").forEach((block) => {
           block.classList.remove("is-dragging");
         });
+        this.clearDropIndicator();
       });
 
       [this.root, this.dropTarget].forEach((target) => {
@@ -333,7 +339,14 @@
           if (this.hasImageFiles(event.dataTransfer) || this.draggingId) {
             event.preventDefault();
             event.dataTransfer.dropEffect = this.draggingId ? "move" : "copy";
+            this.showDropIndicator(this.getDropTarget(event));
           }
+        });
+
+        target.addEventListener("dragleave", (event) => {
+          const nextTarget = event.relatedTarget;
+          if (nextTarget && (target.contains(nextTarget) || this.root.contains(nextTarget))) return;
+          this.clearDropIndicator();
         });
 
         target.addEventListener("drop", (event) => {
@@ -394,6 +407,10 @@
           `;
         })
         .join("");
+
+      if (this.dropIndicator.parentElement !== this.root) {
+        this.root.append(this.dropIndicator);
+      }
 
       this.root.querySelectorAll("[data-rich-text-block]").forEach((textarea) => {
         this.autoSize(textarea);
@@ -773,11 +790,25 @@
     getDropTarget(event) {
       const textBlock = event.target.closest?.("[data-rich-text-block]");
       if (textBlock && this.root.contains(textBlock)) {
+        const blockIndex = Number(textBlock.dataset.blockIndex);
+        const style = window.getComputedStyle(textBlock);
+        const lineHeight = parseFloat(style.lineHeight) || 34;
+        const paddingTop = parseFloat(style.paddingTop) || 0;
+        const lines = textBlock.value.split("\n");
+        const rect = textBlock.getBoundingClientRect();
+        const relativeY = event.clientY - rect.top + textBlock.scrollTop - paddingTop;
+        const lineSlot = Math.min(Math.max(Math.floor((relativeY + lineHeight * 0.34) / lineHeight), 0), lines.length);
+        let start = 0;
+        for (let index = 0; index < lineSlot; index += 1) {
+          start += (lines[index] || "").length + 1;
+        }
+
         return {
           type: "text",
-          index: Number(textBlock.dataset.blockIndex),
-          start: textBlock.selectionStart,
-          end: textBlock.selectionEnd,
+          index: blockIndex,
+          start,
+          end: start,
+          lineSlot,
         };
       }
 
@@ -792,6 +823,58 @@
       }
 
       return { type: "index", index: this.blocks.length };
+    }
+
+    getDropIndicatorTop(target) {
+      const rootRect = this.root.getBoundingClientRect();
+      if (!rootRect.height) return 18;
+
+      if (target.type === "text") {
+        const textBlock = this.root.querySelector(`[data-rich-text-block][data-block-index="${target.index}"]`);
+        if (textBlock) {
+          const rect = textBlock.getBoundingClientRect();
+          const style = window.getComputedStyle(textBlock);
+          const lineHeight = parseFloat(style.lineHeight) || 34;
+          const paddingTop = parseFloat(style.paddingTop) || 0;
+          const lineSlot = Number.isFinite(target.lineSlot) ? target.lineSlot : 0;
+          const top = rect.top - rootRect.top + paddingTop + lineSlot * lineHeight - textBlock.scrollTop;
+          return Math.min(Math.max(top, rect.top - rootRect.top + 6), rect.bottom - rootRect.top - 6);
+        }
+      }
+
+      const index = Math.min(Math.max(target.index ?? this.blocks.length, 0), this.blocks.length);
+      const targetBlock = this.root.querySelector(`[data-block-index="${index}"]`);
+      if (targetBlock) {
+        const rect = targetBlock.getBoundingClientRect();
+        return rect.top - rootRect.top;
+      }
+
+      const previousBlock = this.root.querySelector(`[data-block-index="${index - 1}"]`);
+      if (previousBlock) {
+        const rect = previousBlock.getBoundingClientRect();
+        return rect.bottom - rootRect.top + 14;
+      }
+
+      return 18;
+    }
+
+    showDropIndicator(target) {
+      if (!this.dropIndicator) return;
+      const top = this.getDropIndicatorTop(target);
+      this.dropIndicator.hidden = false;
+      this.dropIndicator.style.top = `${top}px`;
+      this.dropIndicator.classList.add("is-visible");
+      this.root.classList.add("is-drag-target");
+      window.clearTimeout(this.dropIndicatorTimer);
+    }
+
+    clearDropIndicator() {
+      window.clearTimeout(this.dropIndicatorTimer);
+      this.dropIndicatorTimer = 0;
+      this.root.classList.remove("is-drag-target");
+      if (!this.dropIndicator) return;
+      this.dropIndicator.classList.remove("is-visible");
+      this.dropIndicator.hidden = true;
     }
 
     insertBlocks(newBlocks, target = this.getActiveTextTarget()) {
@@ -920,6 +1003,8 @@
     }
 
     handleDrop(event) {
+      this.clearDropIndicator();
+
       if (this.hasImageFiles(event.dataTransfer)) {
         event.preventDefault();
         event.stopPropagation();
@@ -972,15 +1057,72 @@
       const from = this.blocks.findIndex((block) => block.type === "image" && block.id === id);
       if (from < 0) return;
 
-      let to = target.type === "index" ? target.index : target.index;
-      if (to > from) to -= 1;
-      if (to === from) return;
-
       const [image] = this.blocks.splice(from, 1);
-      this.blocks.splice(Math.min(Math.max(to, 0), this.blocks.length), 0, image);
-      this.render();
-      this.notifyChange();
+      const adjustedTarget = {
+        ...target,
+        index: target.index > from ? target.index - 1 : target.index,
+      };
+      this.insertBlocks([image], adjustedTarget);
       this.onStatus("图片位置已调整");
+    }
+
+    getOutlineHeadings() {
+      const headings = [];
+
+      this.blocks.forEach((block, blockIndex) => {
+        if (block.type !== "text") return;
+
+        let start = 0;
+        const lines = String(block.text || "").split("\n");
+        lines.forEach((line, lineIndex) => {
+          const match = line.match(/^\s{0,3}(#{1,4})\s+(.+?)\s*$/);
+          if (match) {
+            headings.push({
+              id: `${blockIndex}:${lineIndex}:${start}`,
+              blockIndex,
+              lineIndex,
+              level: match[1].length,
+              text: match[2].trim(),
+              start,
+              end: start + line.length,
+            });
+          }
+          start += line.length + 1;
+        });
+      });
+
+      return headings;
+    }
+
+    getActiveHeadingId() {
+      const textarea = this.activeTextArea();
+      if (!textarea) return "";
+
+      const blockIndex = Number(textarea.dataset.blockIndex);
+      const position = textarea.selectionStart ?? 0;
+      const headings = this.getOutlineHeadings();
+      let activeId = "";
+
+      headings.forEach((heading) => {
+        if (heading.blockIndex < blockIndex || (heading.blockIndex === blockIndex && heading.start <= position)) {
+          activeId = heading.id;
+        }
+      });
+
+      return activeId || headings[0]?.id || "";
+    }
+
+    focusHeading(heading) {
+      if (!heading) return false;
+      const textarea = this.root.querySelector(`[data-rich-text-block][data-block-index="${heading.blockIndex}"]`);
+      if (!textarea) return false;
+
+      this.activeBlockIndex = heading.blockIndex;
+      textarea.focus({ preventScroll: true });
+      textarea.setSelectionRange(heading.start, heading.end);
+      textarea.scrollIntoView({ block: "center", behavior: "smooth" });
+      this.autoSize(textarea, { preserveScroll: false });
+      return true;
     }
   }
 
