@@ -53,6 +53,7 @@ const draftsKey = "glass-blog-saved-drafts";
 const currentDraftIdKey = "glass-blog-current-draft-id";
 const publishedPostsKey = "glass-blog-published-posts";
 const hiddenPostsKey = "glass-blog-hidden-posts";
+const summaryMaxLength = 80;
 const categoryLabels = {
   tech: "技术",
   life: "生活",
@@ -98,6 +99,13 @@ function safeUrl(value) {
 function cleanHighlightColor(value) {
   const match = String(value || "").trim().match(/^#?([0-9a-fA-F]{6})$/);
   return match ? `#${match[1].toLowerCase()}` : "#ffd966";
+}
+
+function clampSummary(value, maxLength = summaryMaxLength) {
+  const text = String(value || "").replace(/\s+/g, " ").trim();
+  if (!text) return "";
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength).trimEnd();
 }
 
 function renderHighlightMarks(value) {
@@ -266,7 +274,7 @@ function getDraft() {
     slug,
     date,
     category,
-    summary: summaryInput?.value.trim() || "",
+    summary: clampSummary(summaryInput?.value),
     tags: getTags(),
     content: contentInput?.value || "",
     images: [],
@@ -486,6 +494,15 @@ function update() {
   }
 }
 
+function enforceSummaryLimit() {
+  if (!summaryInput) return;
+  const clamped = clampSummary(summaryInput.value);
+  if (summaryInput.value !== clamped) {
+    summaryInput.value = clamped;
+    setStatus(`摘要已限制在 ${summaryMaxLength} 字以内`);
+  }
+}
+
 function renderSavedDrafts() {
   const drafts = readSavedDrafts().sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 
@@ -620,6 +637,7 @@ async function publishCurrentPost() {
       const readyDraft = getDraft();
       setStatus("正在发布到 GitHub，GitHub Pages 稍后会自动刷新...");
       const result = await window.GlassBlogRemote.publishPost(readyDraft);
+      writePublishedPosts(readPublishedPosts().filter((item) => item.slug !== readyDraft.slug));
       writeHiddenPosts(readHiddenPosts().filter((slug) => slug !== readyDraft.slug));
 
       if (currentDraftId) {
@@ -954,9 +972,11 @@ mediaEditor?.setValue(contentInput?.value || "", legacyImages);
 update();
 renderSavedDrafts();
 setEditorView("write");
+summaryInput?.setAttribute("maxlength", String(summaryMaxLength));
 
 form?.addEventListener("input", (event) => {
   if (event.target.closest("[data-media-flow]")) return;
+  if (event.target === summaryInput) enforceSummaryLimit();
   scheduleUpdate();
 });
 slugInput?.addEventListener("input", () => {

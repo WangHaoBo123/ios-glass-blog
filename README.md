@@ -1,4 +1,4 @@
-# 灰玻璃日记
+# 霁光札记
 
 一个深色 iOS 磨砂玻璃风格的静态 Markdown 博客，不需要服务器，可部署到 GitHub Pages。
 
@@ -74,3 +74,4 @@ http://localhost:8080/login.html
 如果要让线上网站直接发布、修改、删除 GitHub 仓库里的文章，请按 `ONLINE_ADMIN.md` 配置 Cloudflare Worker 发布接口。
 
 第一次进入会注册一个只保存在当前浏览器里的作者账号；之后访问 `compose.html` 和 `manage.html` 都会先检查登录状态。发布到 GitHub Pages 后，公开域名不会开放注册。这个方案用于收起本地编辑入口和避免普通访客误操作；如果要在公网真正多人协作写入仓库，建议后续接 Decap CMS、GitHub OAuth 或带服务端的 CMS。
+

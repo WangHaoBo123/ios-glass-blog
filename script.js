@@ -48,70 +48,91 @@ const categoryLabels = {
 const publishedPostsKey = "glass-blog-published-posts";
 const hiddenPostsKey = "glass-blog-hidden-posts";
 const siteUrl = "https://starytra32.top/";
-const siteTitle = "灰玻璃日记";
+const siteTitle = "霁光札记";
 const siteDescription = "一个深色磨砂玻璃风格的个人静态博客，可写 Markdown 文章并部署到 GitHub Pages。";
+const summaryMaxLength = 80;
+const cardSummaryMaxLength = 56;
+const cardTagLimit = 2;
 
 const fallbackPosts = [
   {
+    slug: "22233311",
+    title: "五月里一个普通周末",
+    date: "2026-05-17",
+    category: "生活",
+    summary: "没有安排什么特别的事，只是出门、吃饭、回家、发呆，却比想象中更像在过日子。",
+    tags: ["周末", "生活"],
+    content: `# 五月里一个普通周末
+
+上周末其实没做什么特别的事。
+
+没有出远门，也没有见很多人。上午醒得不算早，窗帘拉开以后，房间里那种已经进夏天一点点的亮度让我发了一会儿呆。洗漱、烧水、找衣服、出门，整个过程都很普通，普通到几乎没什么可记的。可就是这种没什么大事发生的两天，反而让我觉得自己真的在过日子。`,
+  },
+  {
+    slug: "long-feature-test",
+    title: "一整天没有消息提醒之后",
+    date: "2026-05-17",
+    category: "生活",
+    summary: "把通知关掉一天之后，我注意到很多原本会被忽略的小事：风、路、饭桌上的沉默，还有自己真正想做什么。",
+    tags: ["生活", "独处", "日常"],
+    content: `# 一整天没有消息提醒之后
+
+前几天我试着把通知关掉了一整天。
+
+不是完全失联，也不是突然要过什么很极端的慢生活。只是把那些会突然亮起来的小红点、横幅提示、震动和提示音暂时都按了下去。刚开始其实不太习惯，手还是会下意识去摸手机，像是在等什么。可真到了中午以后，人才慢慢意识到，原来很多“必须马上知道”的事情，并没有真的那么急。`,
+  },
+  {
     slug: "static-blog-system",
-    title: "如何把一个静态博客长期维护下去",
+    title: "晚饭后出去走了二十分钟",
     date: "2026-05-16",
-    category: "技术",
-    summary: "从目录结构、文章命名、图片管理到 GitHub Pages 发布流程，整理一套不容易半途而废的写作系统。",
-    tags: ["GitHub Pages", "Markdown", "静态博客"],
+    category: "生活",
+    summary: "最近重新把晚饭后的散步捡了回来，走得不快，但整个人会慢慢安静下来。",
+    tags: ["散步", "生活", "日常"],
     featured: true,
-    content: `# 如何把一个静态博客长期维护下去
+    content: `# 晚饭后出去走了二十分钟
 
-静态博客最舒服的地方，是它没有后台、数据库和服务器维护压力。文章就是文件，样式就是代码，发布就是一次提交。
+最近重新把晚饭后的散步捡了回来。
 
-## 推荐结构
-
-- \`posts/index.json\` 保存文章列表和摘要。
-- \`posts/*.md\` 保存正文。
-- 图片可以放到 \`assets\` 或 \`posts/images\`。
-
-## 写作节奏
-
-每篇文章只要先写清楚标题、摘要、标签和日期，后面就可以慢慢补正文。个人博客最重要的不是一次做大，而是能一直写下去。`,
+说是散步，其实也不是什么很有仪式感的事。吃完饭，把碗放进水池里，拿上钥匙，穿双最普通的鞋，下楼，沿着小区外面那条熟悉得有点无聊的路慢慢走一圈。没有耳机，也不刻意想什么，只是往前走。`,
   },
   {
     slug: "quiet-workflow",
     title: "最近喜欢的安静工作流",
     date: "2026-05-12",
     category: "生活",
-    summary: "少开标签页，少切窗口，把一天拆成几个有边界的小段。",
-    tags: ["生活", "效率"],
+    summary: "把一天拆成几个安静的小段，少切换，少说服自己，反而更容易把事情做完。",
+    tags: ["生活", "节奏"],
     content: `# 最近喜欢的安静工作流
 
-我最近越来越喜欢把工作环境收窄：少开标签页，少开聊天窗口，只保留一个正在处理的问题。
+我最近很喜欢把一天拆成几个安静的小段。
 
-这种方式不一定最快，但它很稳。稳下来以后，很多原本觉得乱的事，会自己排出轻重缓急。`,
+不是那种写得很满的时间表，也不是严格到有点紧张的自律游戏。更像是给自己留几个边界清楚的小房间：这一段只做这一件事，做完再换下一件。手机放远一点，聊天窗口先别开，浏览器标签页也别堆太多。`,
   },
   {
     slug: "ui-cleanup",
-    title: "给个人项目做一次 UI 收敛",
+    title: "把桌面收干净之后，心里也松了一点",
     date: "2026-05-03",
-    category: "技术",
-    summary: "删除多余的色彩和组件，让页面重新回到内容本身。",
-    tags: ["前端", "设计", "UI"],
-    content: `# 给个人项目做一次 UI 收敛
+    category: "生活",
+    summary: "最近花了一个晚上整理桌面和房间，没解决什么大问题，但那种松动感很真实。",
+    tags: ["房间", "整理", "生活"],
+    content: `# 把桌面收干净之后，心里也松了一点
 
-个人项目最容易越做越散。一个按钮一种圆角，一个页面一种阴影，最后所有东西都在争夺注意力。
+前几天晚上，我花了点时间整理桌面。
 
-我的做法是先保留三类东西：文字层级、空间关系、关键操作。其他装饰先删掉。删完以后，真正重要的内容会露出来。`,
+不是大扫除那种阵仗，也没有突然决定做一个全新的自己。只是坐在那里，看着桌上那些慢慢堆起来的小东西：喝了一半的水杯、已经不用的便签、几根线、两支写不出字的笔。`,
   },
   {
     slug: "dont-optimize-too-early",
-    title: "短札：别急着优化",
+    title: "短札：别急着给生活下结论",
     date: "2026-04-28",
     category: "短札",
-    summary: "很多时候真正该先做的，是把问题说清楚。",
-    tags: ["短札", "思考"],
-    content: `# 短札：别急着优化
+    summary: "很多事情不是没有答案，只是还没走到该明白的时候。",
+    tags: ["短札", "生活"],
+    content: `# 短札：别急着给生活下结论
 
-很多时候真正该先做的，是把问题说清楚。
+很多事情不是没有答案，只是还没走到该明白的时候。
 
-如果问题本身还没有形状，优化就会变成绕路。`,
+我们太容易在状态不好的那几天里，替一整段生活下结论。一次不顺，就怀疑是不是方向错了；一阵提不起劲，就觉得自己是不是变了。`,
   },
 ];
 
@@ -205,6 +226,13 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function clampSummary(value, maxLength = summaryMaxLength) {
+  const text = String(value || "").replace(/\s+/g, " ").trim();
+  if (!text) return "";
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, Math.max(0, maxLength - 1)).trimEnd()}…`;
 }
 
 function setMetaContent(selector, content) {
@@ -422,14 +450,19 @@ function readingMinutes(content) {
 }
 
 async function fetchText(path) {
-  const response = await fetch(path);
+  const response = await fetch(path, { cache: "no-store" });
   if (!response.ok) throw new Error(`Cannot load ${path}`);
   return response.text();
 }
 
+function prefersStaticPosts() {
+  const host = String(window.location.hostname || "").toLowerCase();
+  return Boolean(host) && host !== "localhost" && host !== "127.0.0.1";
+}
+
 async function loadPosts() {
   try {
-    const response = await fetch("./posts/index.json");
+    const response = await fetch("./posts/index.json", { cache: "no-store" });
     if (!response.ok) throw new Error("posts index missing");
     const index = await response.json();
     const loaded = await Promise.all(
@@ -444,12 +477,21 @@ async function loadPosts() {
   }
 }
 
-function loadLocalPublishedPosts() {
+function loadLocalPublishedPosts(staticPosts = []) {
   try {
     const saved = JSON.parse(localStorage.getItem(publishedPostsKey) || "[]");
     if (!Array.isArray(saved)) return [];
 
-    return saved.map((post) => ({
+    const staticSlugs = new Set(staticPosts.map((post) => post.slug));
+    const filtered = prefersStaticPosts()
+      ? saved.filter((post) => !staticSlugs.has(post.slug))
+      : saved;
+
+    if (filtered.length !== saved.length) {
+      localStorage.setItem(publishedPostsKey, JSON.stringify(filtered));
+    }
+
+    return filtered.map((post) => ({
       ...post,
       file: post.file || `local:${post.slug}`,
       featured: Boolean(post.featured),
@@ -494,13 +536,15 @@ function normalizePost(post) {
   const content = post.content || "";
   const categoryLabel = (post.categoryLabel || categoryLabels[post.category] || post.category || "文章").trim();
   const tags = Array.isArray(post.tags) ? post.tags : [];
+  const summary = clampSummary(post.summary);
 
   return {
     ...post,
     categoryLabel,
+    summary,
     tags,
     minutes: readingMinutes(content),
-    searchText: `${post.title} ${post.summary} ${categoryLabel} ${tags.join(" ")} ${stripMarkdown(content)}`.toLowerCase(),
+    searchText: `${post.title} ${summary} ${categoryLabel} ${tags.join(" ")} ${stripMarkdown(content)}`.toLowerCase(),
   };
 }
 
@@ -571,6 +615,17 @@ function renderMeta(post) {
 
 function renderTagList(tags) {
   return tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("");
+}
+
+function renderCardTagList(tags) {
+  const safeTags = Array.isArray(tags) ? tags.filter(Boolean) : [];
+  const visibleTags = safeTags.slice(0, cardTagLimit);
+  const remaining = safeTags.length - visibleTags.length;
+
+  return [
+    ...visibleTags.map((tag) => `<span>${escapeHtml(tag)}</span>`),
+    ...(remaining > 0 ? [`<span class="tag-more">+${remaining}</span>`] : []),
+  ].join("");
 }
 
 function postLink(post, className = "") {
@@ -749,14 +804,16 @@ function renderPostCard(post, index = 0) {
     : "";
   const bentoPattern = ["post-card-wide", "", "post-card-tall", "", "post-card-soft", "", "post-card-wide"];
   const bentoClass = bentoPattern[index % bentoPattern.length];
+  const readableClass = post.title.length >= 14 ? " post-card-readable" : "";
+  const cardSummary = clampSummary(post.summary, cardSummaryMaxLength);
 
   return `
-    <article class="post-card${bentoClass ? ` ${bentoClass}` : ""}" style="--card-index: ${Math.min(index, 8)};">
+    <article class="post-card${bentoClass ? ` ${bentoClass}` : ""}${readableClass}" style="--card-index: ${Math.min(index, 8)};">
       <a class="post-card-link" href="#post/${encodeURIComponent(post.slug)}">
         <div class="post-meta">${renderMeta(post)}</div>
         <h3>${escapeHtml(post.title)}</h3>
-        <p>${escapeHtml(post.summary)}</p>
-        <div class="tag-list">${renderTagList(post.tags)}</div>
+        <p>${escapeHtml(cardSummary)}</p>
+        <div class="tag-list">${renderCardTagList(post.tags)}</div>
       </a>
       ${manageLink}
     </article>
@@ -964,7 +1021,7 @@ function showArchiveView() {
   hideListView();
   if (archiveView) archiveView.hidden = false;
   renderArchive();
-  updatePageMeta(`归档 - ${siteTitle}`, "按时间浏览灰玻璃日记的所有文章。", "./index.html#archive");
+  updatePageMeta(`归档 - ${siteTitle}`, "按时间浏览霁光札记的所有文章。", "./index.html#archive");
   archiveView?.scrollIntoView({ block: "start" });
 }
 
@@ -974,7 +1031,7 @@ function showTagsView(selectedTag = "") {
   renderTags(selectedTag);
   updatePageMeta(
     selectedTag ? `${selectedTag} - 标签 - ${siteTitle}` : `标签 - ${siteTitle}`,
-    selectedTag ? `浏览灰玻璃日记里标记为「${selectedTag}」的文章。` : "按标签浏览灰玻璃日记的文章。",
+    selectedTag ? `浏览霁光札记里标记为「${selectedTag}」的文章。` : "按标签浏览霁光札记的文章。",
     selectedTag ? `./index.html#tag/${encodeURIComponent(selectedTag)}` : "./index.html#tags",
   );
   tagsView?.scrollIntoView({ block: "start" });
@@ -1363,7 +1420,7 @@ function animateAmbientBars(time) {
 
 async function init() {
   const loadedPosts = await loadPosts();
-  const localPosts = loadLocalPublishedPosts();
+  const localPosts = loadLocalPublishedPosts(loadedPosts);
 
   posts = mergePosts(loadedPosts, localPosts)
     .map(normalizePost)
@@ -1382,3 +1439,4 @@ if (ambient || ambientBarA || ambientBarB) {
 }
 
 init();
+
