@@ -120,6 +120,7 @@ let activeFilter = "all";
 let activeProgressFrame = 0;
 let listTransitionTimer = 0;
 let profileStatusTimer = 0;
+let readerEnterTimer = 0;
 let typingIntroFrame = 0;
 const heroWritingDuration = 3200;
 
@@ -928,10 +929,14 @@ function renderPostNeighbors(post) {
 function showListView() {
   closeImagePreview();
   stopReadingProgress();
+  window.clearTimeout(readerEnterTimer);
   listViews.forEach((view) => {
     view.hidden = false;
   });
-  if (reader) reader.hidden = true;
+  if (reader) {
+    reader.hidden = true;
+    reader.classList.remove("is-reader-entering", "is-reader-preparing");
+  }
   if (archiveView) archiveView.hidden = true;
   if (tagsView) tagsView.hidden = true;
   renderList();
@@ -942,10 +947,14 @@ function showListView() {
 function hideListView() {
   closeImagePreview();
   stopReadingProgress();
+  window.clearTimeout(readerEnterTimer);
   listViews.forEach((view) => {
     view.hidden = true;
   });
-  if (reader) reader.hidden = true;
+  if (reader) {
+    reader.hidden = true;
+    reader.classList.remove("is-reader-entering", "is-reader-preparing");
+  }
   if (archiveView) archiveView.hidden = true;
   if (tagsView) tagsView.hidden = true;
   if (emptyState) emptyState.hidden = true;
@@ -980,8 +989,10 @@ function showPost(slug) {
 
   hideListView();
   if (reader) {
+    window.clearTimeout(readerEnterTimer);
     reader.hidden = false;
     reader.classList.remove("is-reader-entering");
+    reader.classList.add("is-reader-preparing");
   }
 
   if (readerMeta) readerMeta.innerHTML = renderMeta(post);
@@ -1012,8 +1023,9 @@ function showPost(slug) {
   const transitionDelay = window.GlassBlogTransition?.isActive?.()
     ? (window.GlassBlogTransition?.timing?.enterDuration ?? 560) + 120
     : 80;
-  window.setTimeout(() => {
+  readerEnterTimer = window.setTimeout(() => {
     requestAnimationFrame(() => {
+      reader?.classList.remove("is-reader-preparing");
       reader?.classList.add("is-reader-entering");
     });
   }, transitionDelay);

@@ -3003,6 +3003,13 @@ body.is-reading-post .bgm-dock {
   transform-origin: left bottom;
 }
 
+.article-reader.is-reader-preparing .reader-card h1,
+.article-reader.is-reader-preparing .reader-summary,
+.article-reader.is-reader-preparing .reader-card > .tag-list,
+.article-reader.is-reader-preparing .article-body {
+  opacity: 0;
+}
+
 .article-reader.is-reader-entering .reader-card h1 {
   animation: reader-title-arrive 980ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
