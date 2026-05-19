@@ -891,16 +891,14 @@ function renderPostNeighbors(post) {
     item
       ? `
         <a class="neighbor-card neighbor-card-${direction}" href="#post/${encodeURIComponent(item.slug)}" aria-label="${escapeHtml(label)}：${escapeHtml(item.title)}">
-          <span class="neighbor-kicker">${escapeHtml(label)}</span>
+          <span class="neighbor-arrow" aria-hidden="true">${direction === "prev" ? "←" : "→"}</span>
           <strong>${escapeHtml(item.title)}</strong>
-          <small>${escapeHtml(formatDate(item.date))} · ${escapeHtml(item.summary || item.categoryLabel || "")}</small>
         </a>
       `
       : `
         <span class="neighbor-card neighbor-card-${direction} is-empty">
-          <span class="neighbor-kicker">${escapeHtml(label)}</span>
+          <span class="neighbor-arrow" aria-hidden="true">${direction === "prev" ? "←" : "→"}</span>
           <strong>${escapeHtml(emptyText)}</strong>
-          <small>继续从当前这篇慢慢读。</small>
         </span>
       `;
 
