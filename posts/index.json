@@ -2,40 +2,39 @@
   "posts": [
     {
       "slug": "22233311",
-      "title": "22233311",
+      "title": "五月里一个普通周末",
       "date": "2026-05-17",
-      "category": "技术333",
-      "summary": "这里写一句文章摘要，会显示在首页卡片里。",
+      "category": "生活",
+      "summary": "没有安排什么特别的事，只是出门、吃饭、回家、发呆，却比想象中更像在过日子。",
       "tags": [
-        "Markdown",
-        "博客"
+        "周末",
+        "生活"
       ],
       "file": "./posts/22233311.md"
     },
     {
       "slug": "long-feature-test",
-      "title": "一篇用来测试博客功能的长文章",
+      "title": "一整天没有消息提醒之后",
       "date": "2026-05-17",
-      "category": "测试",
-      "summary": "一篇专门用来测试目录、阅读进度、图片、代码块、搜索和长文滚动的综合文章。",
+      "category": "生活",
+      "summary": "把通知关掉一天之后，我注意到很多原本会被忽略的小事：风、路、饭桌上的沉默，还有自己真正想做什么。",
       "tags": [
-        "测试",
-        "Markdown",
-        "图片",
-        "代码块"
+        "生活",
+        "独处",
+        "日常"
       ],
       "file": "./posts/long-feature-test.md"
     },
     {
       "slug": "static-blog-system",
-      "title": "如何把一态博客长期维护下去1111",
+      "title": "晚饭后出去走了二十分钟",
       "date": "2026-05-16",
-      "category": "技术",
-      "summary": "从目录结构、文章命名、图片管理到 GitHub Pages 发布流程，整理一套不容易半途而废的写作系统。",
+      "category": "生活",
+      "summary": "最近重新把晚饭后的散步捡了回来，走得不快，但整个人会慢慢安静下来。",
       "tags": [
-        "GitHub Pages",
-        "Markdown",
-        "静态博客"
+        "散步",
+        "生活",
+        "日常"
       ],
       "featured": true,
       "file": "./posts/static-blog-system.md"
@@ -45,35 +44,35 @@
       "title": "最近喜欢的安静工作流",
       "date": "2026-05-12",
       "category": "生活",
-      "summary": "少开标签页，少切窗口，把一天拆成几个有边界的小段。",
+      "summary": "把一天拆成几个安静的小段，少切换，少说服自己，反而更容易把事情做完。",
       "tags": [
         "生活",
-        "效率"
+        "节奏"
       ],
       "file": "./posts/quiet-workflow.md"
     },
     {
       "slug": "ui-cleanup",
-      "title": "给个人项目做一次 UI 收敛",
+      "title": "把桌面收干净之后，心里也松了一点",
       "date": "2026-05-03",
-      "category": "技术",
-      "summary": "删除多余的色彩和组件，让页面重新回到内容本身。",
+      "category": "生活",
+      "summary": "最近花了一个晚上整理桌面和房间，没解决什么大问题，但那种松动感很真实。",
       "tags": [
-        "前端",
-        "设计",
-        "UI"
+        "房间",
+        "整理",
+        "生活"
       ],
       "file": "./posts/ui-cleanup.md"
     },
     {
       "slug": "dont-optimize-too-early",
-      "title": "短札：别急着优化",
+      "title": "短札：别急着给生活下结论",
       "date": "2026-04-28",
       "category": "短札",
-      "summary": "很多时候真正该先做的，是把问题说清楚。",
+      "summary": "很多事情不是没有答案，只是还没走到该明白的时候。",
       "tags": [
         "短札",
-        "思考"
+        "生活"
       ],
       "file": "./posts/dont-optimize-too-early.md"
     }
