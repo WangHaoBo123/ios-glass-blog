@@ -39,6 +39,9 @@ const profileStatus = document.querySelector("[data-profile-status]");
 const scriptHeroTitle = document.querySelector("[data-script-hero-title]");
 const typingIntro = document.querySelector("[data-typing-intro]");
 const typingIntroOutput = document.querySelector("[data-typing-output]");
+const viewportGuide = document.querySelector("[data-viewport-guide]");
+const viewportGuideRatio = document.querySelector("[data-viewport-guide-ratio]");
+const viewportGuideClose = document.querySelector("[data-viewport-guide-close]");
 
 const categoryLabels = {
   tech: "技术",
@@ -47,6 +50,7 @@ const categoryLabels = {
 };
 const publishedPostsKey = "glass-blog-published-posts";
 const hiddenPostsKey = "glass-blog-hidden-posts";
+const viewportGuideDismissedKey = "glass-blog-viewport-guide-dismissed";
 const siteUrl = "https://starytra32.top/";
 const siteTitle = "霁光札记";
 const siteDescription = "一个深色磨砂玻璃风格的个人静态博客，可写 Markdown 文章并部署到 GitHub Pages。";
@@ -143,6 +147,10 @@ let listTransitionTimer = 0;
 let profileStatusTimer = 0;
 let readerEnterTimer = 0;
 let typingIntroFrame = 0;
+let activeReaderLoadToken = 0;
+let backgroundHydrationStarted = false;
+const postContentRequests = new Map();
+let viewportGuideDismissed = sessionStorage.getItem(viewportGuideDismissedKey) === "1";
 const heroWritingDuration = 3200;
 
 function revealTypingIntroText() {
@@ -449,8 +457,31 @@ function readingMinutes(content) {
   return Math.max(1, Math.ceil(words / 420));
 }
 
+function resolveReadingMinutes(post, content = post.content || "") {
+  const explicitMinutes = Number(post.minutes);
+  if (Number.isFinite(explicitMinutes) && explicitMinutes > 0) {
+    return Math.max(1, Math.round(explicitMinutes));
+  }
+  return content ? readingMinutes(content) : 1;
+}
+
+function buildPostSearchText(post, content = post.content || "") {
+  const tags = Array.isArray(post.tags) ? post.tags : [];
+  const categoryLabel = String(post.categoryLabel || categoryLabels[post.category] || post.category || "");
+  const providedSearchText = String(post.providedSearchText || "");
+
+  return `${post.title || ""} ${post.summary || ""} ${categoryLabel} ${tags.join(" ")} ${providedSearchText} ${stripMarkdown(content)}`
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function resolveFetchCacheMode() {
+  return prefersStaticPosts() ? "default" : "no-store";
+}
+
 async function fetchText(path) {
-  const response = await fetch(path, { cache: "no-store" });
+  const response = await fetch(path, { cache: resolveFetchCacheMode() });
   if (!response.ok) throw new Error(`Cannot load ${path}`);
   return response.text();
 }
@@ -462,18 +493,19 @@ function prefersStaticPosts() {
 
 async function loadPosts() {
   try {
-    const response = await fetch("./posts/index.json", { cache: "no-store" });
+    const response = await fetch("./posts/index.json", { cache: resolveFetchCacheMode() });
     if (!response.ok) throw new Error("posts index missing");
     const index = await response.json();
-    const loaded = await Promise.all(
-      index.posts.map(async (post) => {
-        const content = await fetchText(post.file);
-        return { ...post, content };
-      }),
-    );
-    return loaded;
+    return (Array.isArray(index?.posts) ? index.posts : []).map((post) => ({
+      ...post,
+      content: typeof post.content === "string" ? post.content : "",
+      contentLoaded: typeof post.content === "string" && post.content.trim().length > 0,
+    }));
   } catch {
-    return fallbackPosts;
+    return fallbackPosts.map((post) => ({
+      ...post,
+      contentLoaded: true,
+    }));
   }
 }
 
@@ -538,14 +570,68 @@ function normalizePost(post) {
   const tags = Array.isArray(post.tags) ? post.tags : [];
   const summary = clampSummary(post.summary);
 
-  return {
+  const normalized = {
     ...post,
     categoryLabel,
     summary,
     tags,
-    minutes: readingMinutes(content),
-    searchText: `${post.title} ${summary} ${categoryLabel} ${tags.join(" ")} ${stripMarkdown(content)}`.toLowerCase(),
+    contentLoaded: post.contentLoaded === true || Boolean(content),
+    providedSearchText:
+      typeof post.providedSearchText === "string"
+        ? post.providedSearchText
+        : (typeof post.searchText === "string" ? post.searchText : ""),
   };
+
+  normalized.minutes = resolveReadingMinutes(normalized, content);
+  normalized.searchText = buildPostSearchText(normalized, content);
+
+  return normalized;
+}
+
+async function ensurePostContent(post) {
+  if (!post) return "";
+  if (post.contentLoaded) return String(post.content || "");
+
+  const file = String(post.file || "");
+  if (!file || file.startsWith("local:")) {
+    post.content = String(post.content || "");
+    post.contentLoaded = true;
+    post.minutes = resolveReadingMinutes(post, post.content);
+    post.searchText = buildPostSearchText(post, post.content);
+    return post.content;
+  }
+
+  const existingRequest = postContentRequests.get(post.slug);
+  if (existingRequest) return existingRequest;
+
+  const request = fetchText(file)
+    .then((content) => {
+      post.content = content;
+      post.contentLoaded = true;
+      post.minutes = readingMinutes(content);
+      post.searchText = buildPostSearchText(post, content);
+      return content;
+    })
+    .catch((error) => {
+      const fallbackContent = fallbackPosts.find((item) => item.slug === post.slug)?.content;
+      if (typeof fallbackContent === "string" && fallbackContent.trim()) {
+        post.content = fallbackContent;
+        post.contentLoaded = true;
+        post.minutes = readingMinutes(fallbackContent);
+        post.searchText = buildPostSearchText(post, fallbackContent);
+        return fallbackContent;
+      }
+
+      post.contentLoaded = false;
+      post.searchText = buildPostSearchText(post, "");
+      throw error;
+    })
+    .finally(() => {
+      postContentRequests.delete(post.slug);
+    });
+
+  postContentRequests.set(post.slug, request);
+  return request;
 }
 
 function matchesCurrentView(post) {
@@ -936,6 +1022,61 @@ function renderTags(selectedTag = "") {
   `;
 }
 
+function rerenderCurrentCollectionView() {
+  if (window.location.hash.startsWith("#post/")) return;
+
+  const tagMatch = window.location.hash.match(/^#tag\/(.+)$/);
+  if (window.location.hash === "#archive") {
+    renderArchive();
+    return;
+  }
+
+  if (window.location.hash === "#tags") {
+    renderTags();
+    return;
+  }
+
+  if (tagMatch) {
+    renderTags(decodeURIComponent(tagMatch[1]));
+    return;
+  }
+
+  renderList();
+}
+
+async function hydratePostsInBackground() {
+  const pendingPosts = posts.filter((post) => !post.contentLoaded && post.file && !String(post.file).startsWith("local:"));
+  if (!pendingPosts.length) return;
+
+  for (const post of pendingPosts) {
+    try {
+      await ensurePostContent(post);
+    } catch {
+      // Keep metadata-only rendering if a background fetch fails.
+    }
+
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
+  }
+
+  rerenderCurrentCollectionView();
+}
+
+function scheduleBackgroundPostHydration() {
+  if (backgroundHydrationStarted) return;
+  backgroundHydrationStarted = true;
+
+  const run = () => {
+    void hydratePostsInBackground();
+  };
+
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(run, { timeout: 1800 });
+    return;
+  }
+
+  window.setTimeout(run, 900);
+}
+
 function renderPostNeighbors(post) {
   if (!postNeighbors) return;
 
@@ -981,6 +1122,46 @@ function renderPostNeighbors(post) {
         : ""
     }
   `;
+}
+
+function renderReaderPostContent(post) {
+  if (!readerBody) return;
+
+  if (readerMeta) readerMeta.innerHTML = renderMeta(post);
+  readerBody.innerHTML = markdownToHtml(contentWithLegacyImages(post.content, post.images));
+  prepareArticleImages();
+  renderReaderToc();
+  startReadingProgress();
+}
+
+function renderReaderLoadingState() {
+  if (readerBody) {
+    readerBody.innerHTML = "<p>Loading article...</p>";
+  }
+
+  if (readerToc) {
+    readerToc.hidden = true;
+    readerToc.innerHTML = "";
+  }
+}
+
+async function loadPostIntoReader(post, loadToken) {
+  try {
+    await ensurePostContent(post);
+    if (loadToken !== activeReaderLoadToken || reader?.hidden) return;
+    renderReaderPostContent(post);
+  } catch {
+    if (loadToken !== activeReaderLoadToken || reader?.hidden) return;
+
+    if (readerBody) {
+      readerBody.innerHTML = "<p>Unable to load this article right now.</p>";
+    }
+
+    if (readerToc) {
+      readerToc.hidden = true;
+      readerToc.innerHTML = "";
+    }
+  }
 }
 
 function showListView() {
@@ -1057,14 +1238,18 @@ function showPost(slug) {
   if (floatingReaderTitleText) floatingReaderTitleText.textContent = post.title;
   if (readerSummary) readerSummary.textContent = post.summary;
   if (readerTags) readerTags.innerHTML = renderTagList(post.tags);
-  if (readerBody) readerBody.innerHTML = markdownToHtml(contentWithLegacyImages(post.content, post.images));
-  prepareArticleImages();
   if (articleSignature) articleSignature.hidden = false;
   if (articleSignatureName) articleSignatureName.textContent = profileName?.textContent?.trim() || "StaryTra 32";
   renderPostNeighbors(post);
-  renderReaderToc();
-  startReadingProgress();
   updatePageMeta(`${post.title} - ${siteTitle}`, post.summary || siteDescription, `./index.html#post/${encodeURIComponent(post.slug)}`);
+
+  const loadToken = ++activeReaderLoadToken;
+  if (post.contentLoaded) {
+    renderReaderPostContent(post);
+  } else {
+    renderReaderLoadingState();
+    void loadPostIntoReader(post, loadToken);
+  }
 
   const readerActions = reader?.querySelector(".reader-actions");
   if (readerActions) {
@@ -1129,10 +1314,48 @@ function routeWithTransition() {
   route();
 }
 
+function currentViewportRatioLabel() {
+  const width = Math.max(1, window.innerWidth || document.documentElement.clientWidth || 1);
+  const height = Math.max(1, window.innerHeight || document.documentElement.clientHeight || 1);
+  return `${width}:${height} · ${(width / height).toFixed(2)}`;
+}
+
+function isViewportGuideNeeded() {
+  const width = window.innerWidth || document.documentElement.clientWidth || 0;
+  const height = window.innerHeight || document.documentElement.clientHeight || 0;
+  const ratio = height ? width / height : 0;
+
+  if (width <= 860) return false;
+  if (viewportGuideDismissed) return false;
+  if (document.body.classList.contains("opening-active")) return false;
+
+  return width < 1240 || height < 760 || ratio < 1.42 || ratio > 2.08;
+}
+
+function updateViewportGuide() {
+  if (!viewportGuide) return;
+
+  if (viewportGuideRatio) {
+    viewportGuideRatio.textContent = `当前窗口比例 ${currentViewportRatioLabel()}`;
+  }
+
+  const shouldShow = isViewportGuideNeeded();
+  viewportGuide.hidden = false;
+  viewportGuide.classList.toggle("is-visible", shouldShow);
+  viewportGuide.setAttribute("aria-hidden", String(!shouldShow));
+}
+
+function dismissViewportGuide() {
+  viewportGuideDismissed = true;
+  sessionStorage.setItem(viewportGuideDismissedKey, "1");
+  updateViewportGuide();
+}
+
 window.GlassBlogApp = {
   route,
   routeWithTransition,
   syncChromeState,
+  updateViewportGuide,
 };
 
 function scrollToArticleHeading(target) {
@@ -1194,6 +1417,8 @@ function syncChromeState() {
   if (backToTopButton) {
     backToTopButton.hidden = !(reading && window.scrollY > 520);
   }
+
+  updateViewportGuide();
 }
 
 function queueReadingProgressUpdate() {
@@ -1290,6 +1515,8 @@ searchInput?.addEventListener("input", () => {
   }
   renderListWithMotion();
 });
+
+viewportGuideClose?.addEventListener("click", dismissViewportGuide);
 
 window.addEventListener("hashchange", routeWithTransition);
 window.addEventListener("scroll", syncChromeState, { passive: true });
@@ -1432,6 +1659,8 @@ async function init() {
   if (loadingState) loadingState.hidden = true;
   route();
   syncChromeState();
+  scheduleBackgroundPostHydration();
+  updateViewportGuide();
 }
 
 if (ambient || ambientBarA || ambientBarB) {

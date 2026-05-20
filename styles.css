@@ -183,6 +183,132 @@ body.opening-active {
   line-height: 1.45;
 }
 
+.viewport-guide {
+  position: fixed;
+  right: max(22px, env(safe-area-inset-right));
+  bottom: max(22px, env(safe-area-inset-bottom));
+  z-index: 10030;
+  width: min(420px, calc(100vw - 44px));
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(0, 18px, 0) scale(0.985);
+  transition:
+    opacity 260ms ease,
+    transform 320ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.viewport-guide.is-visible {
+  pointer-events: auto;
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.viewport-guide[hidden] {
+  display: block;
+}
+
+.viewport-guide-card {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  padding: 20px 20px 18px;
+  overflow: hidden;
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom-color: rgba(0, 0, 0, 0.2);
+  border-radius: 28px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.04)),
+    rgba(18, 20, 23, 0.46);
+  box-shadow:
+    0 20px 58px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(28px) saturate(145%);
+  -webkit-backdrop-filter: blur(28px) saturate(145%);
+}
+
+.viewport-guide-card::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background:
+    linear-gradient(112deg, transparent 0 28%, rgba(255, 255, 255, 0.08) 42%, transparent 58% 100%);
+  opacity: 0.54;
+  transform: translateX(-30%);
+}
+
+.viewport-guide-kicker,
+.viewport-guide-copy,
+.viewport-guide-meta {
+  position: relative;
+  z-index: 1;
+}
+
+.viewport-guide-kicker {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.viewport-guide-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.viewport-guide-copy strong {
+  font-size: 18px;
+  line-height: 1.45;
+}
+
+.viewport-guide-copy p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.viewport-guide-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.viewport-guide-meta span {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.viewport-guide-close {
+  flex-shrink: 0;
+  min-width: 78px;
+  height: 38px;
+  padding: 0 16px;
+  color: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.08)),
+    rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34);
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease;
+}
+
+.viewport-guide-close:hover {
+  transform: translateY(-1px);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1)),
+    rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
 @keyframes cross-background-drift {
   0% {
     background-position:
@@ -6402,5 +6528,9 @@ body.is-reading-post .bgm-dock {
       radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.08), transparent 34%),
       linear-gradient(180deg, rgba(10, 11, 13, 0.26), rgba(10, 11, 13, 0.56)),
       transparent;
+  }
+
+  .viewport-guide {
+    display: none !important;
   }
 }

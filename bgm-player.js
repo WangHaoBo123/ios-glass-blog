@@ -1,5 +1,5 @@
 (function () {
-  const playlistUrl = "./assets/music/playlist.json?v=20260518-bgm";
+  const playlistUrl = "./assets/music/playlist.json?v=20260520-perf-pass";
   const enabledKey = "glass-blog-bgm-enabled";
   const stateKey = "glass-blog-bgm-state";
   const suppressPromptKey = "glass-blog-bgm-suppress-next-prompt-v2";
@@ -23,6 +23,16 @@
       artist: "Chewie Melodies · Pealeaf",
       src: "./assets/music/the-song-of-the-wanderer-chewie-melodies-pealeaf.mp3",
     },
+    {
+      title: "Lily",
+      artist: "seibin, Youngjee Lee, SHIFT UP",
+      src: "./assets/music/lily-seibin-youngjee-lee-shift-up.mp3",
+    },
+    {
+      title: "White Night",
+      artist: "ko.yo & SHIFT UP",
+      src: "./assets/music/white-night-koyo-shift-up.mp3",
+    },
   ];
 
   let tracks = [];
@@ -34,10 +44,12 @@
   let lastStateWriteSecond = -1;
   let prompt = null;
   let resumeOnGesture = null;
+  let hasAttemptedRestore = false;
+  let playlistLoadPromise = null;
 
   const audio = document.createElement("audio");
   audio.className = "bgm-audio";
-  audio.preload = "auto";
+  audio.preload = "metadata";
   audio.setAttribute("playsinline", "");
   audio.volume = Number(localStorage.getItem(volumeKey)) || defaultVolume;
 
@@ -54,7 +66,7 @@
     </button>
     <div class="bgm-copy">
       <strong data-bgm-title>Background music</strong>
-      <span data-bgm-status>正在读取歌单</span>
+      <span data-bgm-status>点击左下角播放音乐</span>
     </div>
     <div class="bgm-wave" aria-hidden="true">
       <span style="--wave-index: 0"></span>
@@ -95,6 +107,23 @@
     if (title) title.textContent = message;
   }
 
+  function currentPageName() {
+    return (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+  }
+
+  function isHomePage() {
+    return currentPageName() === "index.html";
+  }
+
+  function isPromptQuietPage() {
+    return promptQuietPages.has(currentPageName()) || document.body.classList.contains("is-soft-page");
+  }
+
+  function shouldUseNetworkCache() {
+    const host = String(window.location.hostname || "").toLowerCase();
+    return Boolean(host) && host !== "localhost" && host !== "127.0.0.1";
+  }
+
   function fileTitle(src) {
     const clean = String(src || "").split("/").pop()?.replace(/\.[a-z0-9]+$/i, "") || "Untitled track";
     return decodeURIComponent(clean).replaceAll("-", " ").replaceAll("_", " ");
@@ -108,35 +137,6 @@
       artist: String(track.artist || "Local playlist"),
       src: String(track.src),
     };
-  }
-
-  function describeAudioError(error) {
-    if (error?.name === "NotAllowedError") return "浏览器要求先点击播放";
-    if (error?.name === "NotSupportedError") return "浏览器不支持这个音频";
-
-    const mediaError = audio.error;
-    if (!mediaError) return "播放失败，请再点一次";
-
-    const messages = {
-      1: "播放被中断",
-      2: "音频文件加载失败",
-      3: "音频解码失败",
-      4: "浏览器不支持这个音频",
-    };
-
-    return messages[mediaError.code] || "播放失败，请再点一次";
-  }
-
-  function currentPageName() {
-    return (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
-  }
-
-  function isHomePage() {
-    return currentPageName() === "index.html";
-  }
-
-  function isPromptQuietPage() {
-    return promptQuietPages.has(currentPageName()) || document.body.classList.contains("is-soft-page");
   }
 
   function resolveSrc(src) {
@@ -158,6 +158,23 @@
   function setCurrentTrack(track) {
     currentTrack = track || null;
     currentIndex = currentTrack ? tracks.findIndex((item) => sameSrc(item.src, currentTrack.src)) : -1;
+  }
+
+  function describeAudioError(error) {
+    if (error?.name === "NotAllowedError") return "浏览器需要你先点击一下页面";
+    if (error?.name === "NotSupportedError") return "当前浏览器不支持这段音频";
+
+    const mediaError = audio.error;
+    if (!mediaError) return "播放失败，请再试一次";
+
+    const messages = {
+      1: "播放被中断了",
+      2: "音频文件加载失败",
+      3: "音频解码失败",
+      4: "当前浏览器不支持这段音频",
+    };
+
+    return messages[mediaError.code] || "播放失败，请再试一次";
   }
 
   function readPlaybackState() {
@@ -289,6 +306,65 @@
     }
   }
 
+  async function ensurePlaylistLoaded(options = {}) {
+    if (!playlistLoadPromise) {
+      setStatus("正在读取歌单");
+
+      playlistLoadPromise = (async () => {
+        if (window.location.protocol === "file:") {
+          tracks = fallbackTracks;
+          setStatus("本地文件模式");
+        } else {
+          try {
+            const response = await fetch(playlistUrl, { cache: shouldUseNetworkCache() ? "default" : "no-store" });
+            if (!response.ok) throw new Error("playlist missing");
+
+            const data = await response.json();
+            tracks = (Array.isArray(data.tracks) ? data.tracks : [])
+              .map(normalizeTrack)
+              .filter(Boolean);
+          } catch {
+            tracks = fallbackTracks;
+          }
+        }
+
+        isReady = true;
+        dock.classList.add("is-ready");
+        if (nextButton) nextButton.disabled = tracks.length < 2;
+
+        if (!tracks.length) {
+          setTitle("No music yet");
+          setStatus("还没有可用音乐");
+          return tracks;
+        }
+
+        setTitle(`${tracks.length} tracks`);
+        setStatus(window.location.protocol === "file:" ? "点击播放本地音乐" : "点击播放背景音乐");
+        return tracks;
+      })();
+    }
+
+    await playlistLoadPromise;
+    if (!tracks.length) return tracks;
+
+    if (!hasAttemptedRestore && options.restore !== false) {
+      hasAttemptedRestore = true;
+      if (await restoreSavedPlayback()) {
+        return tracks;
+      }
+    }
+
+    if (localStorage.getItem(enabledKey) === "1") {
+      setStatus("点击继续播放");
+    }
+
+    if (options.showPrompt) {
+      showPrompt();
+    }
+
+    return tracks;
+  }
+
   function pickRandomTrack() {
     if (!tracks.length) return null;
     if (tracks.length === 1) {
@@ -305,12 +381,14 @@
   }
 
   async function playRandomTrack() {
-    const track = pickRandomTrack();
-    if (!track) {
+    if (!tracks.length) {
       setTitle("No music yet");
-      setStatus("先配置 assets/music/playlist.json");
+      setStatus("先把音乐放进 assets/music");
       return;
     }
+
+    const track = pickRandomTrack();
+    if (!track) return;
 
     setCurrentTrack(track);
     audio.src = track.src;
@@ -323,13 +401,19 @@
       updatePlayingState(true);
       writePlaybackState({ playing: true });
     } catch (error) {
-      updatePlayingState(false);
+      updatePlayingState(false, { remember: false });
+      if (error?.name === "NotAllowedError") {
+        localStorage.setItem(enabledKey, "1");
+        writePlaybackState({ playing: true });
+        scheduleGestureResume();
+      }
       setStatus(describeAudioError(error));
     }
   }
 
   async function acceptPromptPlayback() {
     closePrompt();
+    await ensurePlaylistLoaded({ showPrompt: false, restore: false });
     await playRandomTrack();
   }
 
@@ -337,13 +421,12 @@
     closePrompt();
 
     if (!isReady) {
-      setStatus("歌单还在读取");
-      return;
+      await ensurePlaylistLoaded({ showPrompt: false });
     }
 
     if (!tracks.length) {
       setTitle("No music yet");
-      setStatus("把歌曲加入 assets/music 后再播放");
+      setStatus("先把音乐放进 assets/music");
       return;
     }
 
@@ -364,58 +447,21 @@
     try {
       await audio.play();
       updatePlayingState(true);
-      setStatus(tracks[currentIndex]?.artist || "正在播放");
+      setStatus(currentTrack?.artist || "正在播放");
       writePlaybackState({ playing: true });
     } catch (error) {
-      updatePlayingState(false);
+      updatePlayingState(false, { remember: false });
+      if (error?.name === "NotAllowedError") {
+        localStorage.setItem(enabledKey, "1");
+        writePlaybackState({ playing: true });
+        scheduleGestureResume();
+      }
       setStatus(describeAudioError(error));
     }
   }
 
-  async function loadPlaylist() {
-    if (window.location.protocol === "file:") {
-      tracks = fallbackTracks;
-      setStatus("本地文件模式");
-    } else {
-      try {
-        const response = await fetch(playlistUrl, { cache: "no-store" });
-        if (!response.ok) throw new Error("playlist missing");
-
-        const data = await response.json();
-        tracks = (Array.isArray(data.tracks) ? data.tracks : [])
-          .map(normalizeTrack)
-          .filter(Boolean);
-      } catch {
-        tracks = fallbackTracks;
-      }
-    }
-
-    isReady = true;
-    dock.classList.add("is-ready");
-    if (nextButton) nextButton.disabled = tracks.length < 2;
-
-    if (!tracks.length) {
-      setTitle("No music yet");
-      setStatus("等待本地歌单");
-      return;
-    }
-
-    setTitle(`${tracks.length} tracks`);
-    setStatus(window.location.protocol === "file:" ? "点击播放本地音乐" : "点击随机播放");
-
-    if (await restoreSavedPlayback()) {
-      return;
-    }
-
-    if (localStorage.getItem(enabledKey) === "1") {
-      setStatus("点击继续播放");
-    }
-
-    showPrompt();
-  }
-
   function showPrompt() {
-    if (prompt || !tracks.length || !audio.paused) return;
+    if (prompt || !audio.paused) return;
     if (isPromptQuietPage()) {
       closePrompt();
       return;
@@ -448,13 +494,47 @@
     prompt.addEventListener("click", closePrompt);
     prompt.querySelector("[data-bgm-prompt-play]")?.addEventListener("click", (event) => {
       event.stopPropagation();
-      acceptPromptPlayback();
+      void acceptPromptPlayback();
     });
   }
 
-  toggleButton?.addEventListener("click", togglePlayback);
-  nextButton?.addEventListener("click", playRandomTrack);
-  audio.addEventListener("ended", playRandomTrack);
+  function initPlaylistBoot() {
+    setTitle("Background music");
+
+    const savedState = readPlaybackState();
+    const shouldRestoreImmediately = localStorage.getItem(enabledKey) === "1" || Boolean(savedState?.playing);
+
+    if (shouldRestoreImmediately) {
+      setStatus("准备恢复播放");
+      void ensurePlaylistLoaded({ showPrompt: false });
+      return;
+    }
+
+    setStatus("点击左下角播放音乐");
+
+    if (!isHomePage() || isPromptQuietPage()) {
+      return;
+    }
+
+    const deferredPrompt = () => showPrompt();
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(deferredPrompt, { timeout: 1800 });
+      return;
+    }
+
+    window.setTimeout(deferredPrompt, 900);
+  }
+
+  toggleButton?.addEventListener("click", () => {
+    void togglePlayback();
+  });
+  nextButton?.addEventListener("click", async () => {
+    await ensurePlaylistLoaded({ showPrompt: false });
+    await playRandomTrack();
+  });
+  audio.addEventListener("ended", () => {
+    void playRandomTrack();
+  });
   audio.addEventListener("pause", () => {
     if (isUserPausing) {
       isUserPausing = false;
@@ -487,7 +567,7 @@
     writePlaybackState();
   });
   audio.addEventListener("error", () => {
-    updatePlayingState(false);
+    updatePlayingState(false, { remember: false });
     setStatus(describeAudioError());
   });
   audio.addEventListener("timeupdate", () => {
@@ -523,15 +603,9 @@
     },
   };
 
-  window.addEventListener("pagehide", () => {
-    prepareForPageExit();
-  });
-
-  window.addEventListener("beforeunload", () => {
-    prepareForPageExit();
-  });
-
+  window.addEventListener("pagehide", prepareForPageExit);
+  window.addEventListener("beforeunload", prepareForPageExit);
   document.addEventListener("visibilitychange", rememberActivePlaybackBeforeHidden);
 
-  loadPlaylist();
+  initPlaylistBoot();
 })();
