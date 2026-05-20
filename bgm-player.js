@@ -47,6 +47,12 @@
   let hasAttemptedRestore = false;
   let playlistLoadPromise = null;
 
+  try {
+    localStorage.removeItem(enabledKey);
+  } catch {
+    // Ignore legacy enabled-state cleanup failures.
+  }
+
   const audio = document.createElement("audio");
   audio.className = "bgm-audio";
   audio.preload = "metadata";
@@ -117,6 +123,14 @@
 
   function isPromptQuietPage() {
     return promptQuietPages.has(currentPageName()) || document.body.classList.contains("is-soft-page");
+  }
+
+  function readEnabledState() {
+    return sessionStorage.getItem(enabledKey) === "1";
+  }
+
+  function writeEnabledState(isEnabled) {
+    sessionStorage.setItem(enabledKey, isEnabled ? "1" : "0");
   }
 
   function shouldUseNetworkCache() {
@@ -246,7 +260,7 @@
       if (event?.target?.closest?.(".bgm-dock, .bgm-prompt")) return;
 
       cancelGestureResume();
-      if (!audio.src || !audio.paused || localStorage.getItem(enabledKey) !== "1") return;
+      if (!audio.src || !audio.paused || !readEnabledState()) return;
 
       try {
         await audio.play();
@@ -267,7 +281,7 @@
 
   async function restoreSavedPlayback() {
     const state = readPlaybackState();
-    if (!state?.playing || localStorage.getItem(enabledKey) !== "1") return false;
+    if (!state?.playing || !readEnabledState()) return false;
 
     const track = findTrackBySrc(state.src) || normalizeTrack(state);
     if (!track) return false;
@@ -288,7 +302,7 @@
       cancelGestureResume();
     } catch (error) {
       updatePlayingState(false, { remember: false });
-      localStorage.setItem(enabledKey, "1");
+      writeEnabledState(true);
       setStatus(error?.name === "NotAllowedError" ? "点击页面继续播放" : describeAudioError(error));
       writePlaybackState({ playing: true });
       scheduleGestureResume();
@@ -302,7 +316,7 @@
     toggleButton?.setAttribute("aria-pressed", String(isPlaying));
     toggleButton?.setAttribute("aria-label", isPlaying ? "暂停背景音乐" : "播放背景音乐");
     if (options.remember !== false) {
-      localStorage.setItem(enabledKey, isPlaying ? "1" : "0");
+      writeEnabledState(isPlaying);
     }
   }
 
@@ -354,7 +368,7 @@
       }
     }
 
-    if (localStorage.getItem(enabledKey) === "1") {
+    if (readEnabledState()) {
       setStatus("点击继续播放");
     }
 
@@ -403,7 +417,7 @@
     } catch (error) {
       updatePlayingState(false, { remember: false });
       if (error?.name === "NotAllowedError") {
-        localStorage.setItem(enabledKey, "1");
+        writeEnabledState(true);
         writePlaybackState({ playing: true });
         scheduleGestureResume();
       }
@@ -452,7 +466,7 @@
     } catch (error) {
       updatePlayingState(false, { remember: false });
       if (error?.name === "NotAllowedError") {
-        localStorage.setItem(enabledKey, "1");
+        writeEnabledState(true);
         writePlaybackState({ playing: true });
         scheduleGestureResume();
       }
@@ -498,11 +512,32 @@
     });
   }
 
+  function schedulePromptDisplay() {
+    const reveal = () => {
+      if (!isHomePage() || isPromptQuietPage()) return;
+      if (sessionStorage.getItem(suppressPromptKey) === "1") {
+        sessionStorage.removeItem(suppressPromptKey);
+        return;
+      }
+
+      showPrompt();
+    };
+
+    if (window.GlassBlogOpening?.isPlaying) {
+      window.GlassBlogOpening.done?.then(() => {
+        window.setTimeout(reveal, 120);
+      });
+      return;
+    }
+
+    window.setTimeout(reveal, 720);
+  }
+
   function initPlaylistBoot() {
     setTitle("Background music");
 
     const savedState = readPlaybackState();
-    const shouldRestoreImmediately = localStorage.getItem(enabledKey) === "1" || Boolean(savedState?.playing);
+    const shouldRestoreImmediately = readEnabledState() || Boolean(savedState?.playing);
 
     if (shouldRestoreImmediately) {
       setStatus("准备恢复播放");
@@ -516,13 +551,7 @@
       return;
     }
 
-    const deferredPrompt = () => showPrompt();
-    if ("requestIdleCallback" in window) {
-      window.requestIdleCallback(deferredPrompt, { timeout: 1800 });
-      return;
-    }
-
-    window.setTimeout(deferredPrompt, 900);
+    schedulePromptDisplay();
   }
 
   toggleButton?.addEventListener("click", () => {
@@ -544,7 +573,7 @@
     }
 
     if (!audio.ended && !isPageUnloading) {
-      if (localStorage.getItem(enabledKey) === "1") {
+      if (readEnabledState()) {
         if (document.visibilityState !== "hidden") {
           setStatus("点击页面继续播放");
           scheduleGestureResume();
@@ -581,7 +610,7 @@
   function prepareForPageExit() {
     isPageUnloading = true;
     writePlaybackState({
-      playing: localStorage.getItem(enabledKey) === "1" && (!audio.ended || Boolean(resumeOnGesture)),
+      playing: readEnabledState() && (!audio.ended || Boolean(resumeOnGesture)),
     });
     if (isPromptQuietPage()) {
       sessionStorage.setItem(suppressPromptKey, "1");
@@ -590,7 +619,7 @@
 
   function rememberActivePlaybackBeforeHidden() {
     if (document.visibilityState !== "hidden") return;
-    if (localStorage.getItem(enabledKey) !== "1" || audio.ended) return;
+    if (!readEnabledState() || audio.ended) return;
 
     writePlaybackState({ playing: true });
   }
