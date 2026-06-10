@@ -1,6 +1,17 @@
 {
   "posts": [
     {
+      "slug": "new-post",
+      "title": "NEW STAR 2025",
+      "date": "2026-06-10",
+      "category": "NEW STAR",
+      "summary": "这里写一句文章摘要，会显示在首页卡片里。",
+      "tags": [
+        "WEB"
+      ],
+      "file": "./posts/new-post.md"
+    },
+    {
       "slug": "22233311",
       "title": "五月里一个普通周末",
       "date": "2026-05-17",
