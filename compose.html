@@ -8,7 +8,10 @@
     <meta name="robots" content="noindex, nofollow" />
     <title>写作 - 霁光札记</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=20260519-tag-rail" />
+    <link rel="preload" href="./assets/fonts/SourceHanSansCN-Heavy-subset.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="./assets/fonts/Inter-28pt-SemiBold.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="./assets/fonts/PalaceScriptMT.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="./styles.css?v=20260611-editor-flow" />
   </head>
   <body>
     <div class="mobile-access-notice" aria-live="polite">
@@ -62,43 +65,13 @@
         </div>
 
         <div class="button-row editor-actions">
-          <button class="secondary-button" type="button" data-new-draft>新草稿</button>
           <button class="action-button" type="button" data-save-draft>保存草稿</button>
           <button class="publish-button" type="button" data-publish-post>发布文章</button>
-          <button class="secondary-button" type="button" data-clear-draft>清空</button>
-          <button class="secondary-button" type="button" data-copy-entry>复制条目</button>
-          <button class="action-button" type="button" data-download>下载 Markdown</button>
+          <button class="secondary-button" type="button" data-new-draft>新建</button>
         </div>
       </section>
 
       <form class="editor-layout" data-compose-form>
-        <div class="block-toolbar" role="toolbar" aria-label="Markdown 格式工具" data-view-panel="write">
-          <button type="button" data-md="h1" data-tooltip="一级标题" data-shortcut="Ctrl+Alt+1" aria-label="一级标题">H1</button>
-          <button type="button" data-md="h2" data-tooltip="二级标题" data-shortcut="Ctrl+Alt+2" aria-label="二级标题">H2</button>
-          <button type="button" data-md="h3" data-tooltip="三级标题" data-shortcut="Ctrl+Alt+3" aria-label="三级标题">H3</button>
-          <button type="button" data-md="h4" data-tooltip="四级标题" data-shortcut="Ctrl+Alt+4" aria-label="四级标题">H4</button>
-          <button type="button" data-md="bold" data-tooltip="加粗选中文字" data-shortcut="Ctrl+B" aria-label="加粗选中文字">B</button>
-          <button type="button" data-md="italic" data-tooltip="斜体选中文字" data-shortcut="Ctrl+I" aria-label="斜体选中文字">I</button>
-          <span class="highlight-tool" aria-label="荧光笔标记">
-            <button class="highlight-button" type="button" data-md="highlight" data-tooltip="荧光笔标记" data-shortcut="Ctrl+Shift+H" aria-label="荧光笔标记选中文字">H</button>
-            <span class="highlight-swatches" data-highlight-swatches aria-label="选择荧光笔颜色">
-              <button class="is-active" type="button" data-highlight-color="#ffd966" style="--swatch: #ffd966;" aria-label="暖黄荧光笔"></button>
-              <button type="button" data-highlight-color="#ffb3c7" style="--swatch: #ffb3c7;" aria-label="雾粉荧光笔"></button>
-              <button type="button" data-highlight-color="#9be7c7" style="--swatch: #9be7c7;" aria-label="薄荷荧光笔"></button>
-              <button type="button" data-highlight-color="#9fd8ff" style="--swatch: #9fd8ff;" aria-label="冰蓝荧光笔"></button>
-              <button type="button" data-highlight-color="#c8b8ff" style="--swatch: #c8b8ff;" aria-label="淡紫荧光笔"></button>
-              <button type="button" data-highlight-color="#f2f3f5" style="--swatch: #f2f3f5;" aria-label="银白荧光笔"></button>
-            </span>
-          </span>
-          <button type="button" data-md="quote" data-tooltip="引用段落" data-shortcut="Ctrl+Alt+Q" aria-label="引用段落">“”</button>
-          <button type="button" data-md="list" data-tooltip="项目列表" data-shortcut="Ctrl+Alt+L" aria-label="项目列表">•</button>
-          <button type="button" data-md="codeblock" data-tooltip="代码块" data-shortcut="Ctrl+Alt+C" aria-label="代码块">{ }</button>
-          <button type="button" data-md="link" data-tooltip="插入链接" data-shortcut="Ctrl+K" aria-label="插入链接">↗</button>
-          <button type="button" data-emoji-toggle data-tooltip="Emoji 表情" data-shortcut="插入常用表情" aria-label="打开 Emoji 表情合集">☺</button>
-          <button type="button" data-connect-assets data-tooltip="连接图片保存目录" data-shortcut="选择项目根目录" aria-label="连接图片保存目录">图片目录</button>
-          <button type="button" data-import-image data-tooltip="导入图片" data-shortcut="也可以拖入图片" aria-label="导入图片">图片</button>
-        </div>
-
         <section class="compose-panel editor-canvas" data-view-panel="write" data-editor-canvas>
           <input
             class="editor-title-input"
@@ -109,11 +82,40 @@
             aria-label="文章标题"
           />
 
-          <div class="permalink-row">
-            <span>固定链接</span>
-            <code>posts/</code>
-            <input data-slug type="text" autocomplete="off" value="new-post" aria-label="文章 slug" />
-            <code>.md</code>
+          <details class="permalink-row">
+            <summary>固定链接</summary>
+            <span class="permalink-control">
+              <code>posts/</code>
+              <input data-slug type="text" autocomplete="off" value="new-post" aria-label="文章 slug" />
+              <code>.md</code>
+            </span>
+          </details>
+
+          <div class="block-toolbar" role="toolbar" aria-label="Markdown 格式工具" data-view-panel="write">
+            <button type="button" data-md="h1" data-tooltip="一级标题" data-shortcut="Ctrl+Alt+1" aria-label="一级标题">H1</button>
+            <button type="button" data-md="h2" data-tooltip="二级标题" data-shortcut="Ctrl+Alt+2" aria-label="二级标题">H2</button>
+            <button type="button" data-md="bold" data-tooltip="加粗选中文字" data-shortcut="Ctrl+B" aria-label="加粗选中文字">B</button>
+            <button type="button" data-md="italic" data-tooltip="斜体选中文字" data-shortcut="Ctrl+I" aria-label="斜体选中文字">I</button>
+            <button type="button" data-md="quote" data-tooltip="引用段落" data-shortcut="Ctrl+Alt+Q" aria-label="引用段落">“”</button>
+            <button type="button" data-md="list" data-tooltip="项目列表" data-shortcut="Ctrl+Alt+L" aria-label="项目列表">•</button>
+            <button type="button" data-md="link" data-tooltip="插入链接" data-shortcut="Ctrl+K" aria-label="插入链接">↗</button>
+            <button type="button" data-import-image data-tooltip="导入图片" data-shortcut="也可以拖入图片" aria-label="导入图片">图片</button>
+            <span class="highlight-tool" aria-label="荧光笔标记">
+              <button class="highlight-button" type="button" data-md="highlight" data-tooltip="荧光笔标记" data-shortcut="Ctrl+Shift+H" aria-label="荧光笔标记选中文字">H</button>
+              <span class="highlight-swatches" data-highlight-swatches aria-label="选择荧光笔颜色">
+                <button class="is-active" type="button" data-highlight-color="#ffd966" style="--swatch: #ffd966;" aria-label="暖黄荧光笔"></button>
+                <button type="button" data-highlight-color="#ffb3c7" style="--swatch: #ffb3c7;" aria-label="雾粉荧光笔"></button>
+                <button type="button" data-highlight-color="#9be7c7" style="--swatch: #9be7c7;" aria-label="薄荷荧光笔"></button>
+                <button type="button" data-highlight-color="#9fd8ff" style="--swatch: #9fd8ff;" aria-label="冰蓝荧光笔"></button>
+                <button type="button" data-highlight-color="#c8b8ff" style="--swatch: #c8b8ff;" aria-label="淡紫荧光笔"></button>
+                <button type="button" data-highlight-color="#f2f3f5" style="--swatch: #f2f3f5;" aria-label="银白荧光笔"></button>
+              </span>
+            </span>
+            <button type="button" data-md="h3" data-tooltip="三级标题" data-shortcut="Ctrl+Alt+3" aria-label="三级标题">H3</button>
+            <button type="button" data-md="h4" data-tooltip="四级标题" data-shortcut="Ctrl+Alt+4" aria-label="四级标题">H4</button>
+            <button type="button" data-md="codeblock" data-tooltip="代码块" data-shortcut="Ctrl+Alt+C" aria-label="代码块">{ }</button>
+            <button type="button" data-emoji-toggle data-tooltip="Emoji 表情" data-shortcut="插入常用表情" aria-label="打开 Emoji 表情合集">☺</button>
+            <button type="button" data-connect-assets data-tooltip="连接图片保存目录" data-shortcut="选择项目根目录" aria-label="连接图片保存目录">图片目录</button>
           </div>
 
           <input class="image-import-input" data-image-input type="file" accept="image/*" multiple />
@@ -137,6 +139,25 @@
         </section>
 
         <aside class="compose-panel document-sidebar" data-view-panel="write">
+          <div class="sidebar-section publish-panel">
+            <div class="sidebar-title">
+              <span>发布</span>
+              <strong data-publish-state>未发布</strong>
+            </div>
+            <div class="sidebar-action-stack">
+              <button class="publish-button" type="button" data-publish-post>发布文章</button>
+              <a class="secondary-button" href="./index.html#articles">查看首页</a>
+            </div>
+            <p class="publish-note">发布后会先出现在本机首页预览。公开到 GitHub 时，再到导出页复制 Markdown 和文章条目。</p>
+          </div>
+
+          <div class="sidebar-section">
+            <label class="field">
+              <span>摘要</span>
+              <textarea data-summary rows="5">这里写一句文章摘要，会显示在首页卡片里。</textarea>
+            </label>
+          </div>
+
           <div class="sidebar-section">
             <div class="sidebar-title">
               <span>文档</span>
@@ -156,15 +177,6 @@
             </div>
             <p class="editor-outline-empty" data-editor-outline-empty>写下 H1 到 H4 标题后，这里会实时出现导航。</p>
             <div class="editor-outline-list" data-editor-outline-list></div>
-          </div>
-
-          <div class="sidebar-section publish-panel">
-            <div class="sidebar-title">
-              <span>发布</span>
-              <strong data-publish-state>未发布</strong>
-            </div>
-            <p class="publish-note">发布后会先出现在本机首页预览。公开到 GitHub 时，仍然需要导出 Markdown 和文章条目。</p>
-            <a class="secondary-button" href="./index.html#articles">查看首页</a>
           </div>
 
           <div class="sidebar-section">
@@ -196,13 +208,6 @@
             <label class="field">
               <span>标签</span>
               <input data-tags type="text" autocomplete="off" value="Markdown, 博客" />
-            </label>
-          </div>
-
-          <div class="sidebar-section">
-            <label class="field">
-              <span>摘要</span>
-              <textarea data-summary rows="5">这里写一句文章摘要，会显示在首页卡片里。</textarea>
             </label>
           </div>
 
@@ -254,6 +259,11 @@
       </section>
 
       <p class="status-message" data-status aria-live="polite"></p>
+      <div class="compose-quick-actions" data-view-panel="write" aria-label="写作快捷操作">
+        <button class="secondary-button" type="button" data-copy-entry>复制条目</button>
+        <button class="secondary-button" type="button" data-download>下载 Markdown</button>
+        <button class="secondary-button danger-button" type="button" data-clear-draft>清空</button>
+      </div>
     </main>
 
     <footer class="site-footer">
@@ -269,15 +279,13 @@
 
     <script src="./site-config.js"></script>
     <script src="./remote-api.js"></script>
-    <script src="./auth.js"></script>
+    <script src="./auth.js?v=20260610-perf2"></script>
     <script src="./page-transition.js"></script>
-    <script src="./cursor-trail.js"></script>
     <script src="./nav-liquid.js?v=20260519-liquid-nav"></script>
     <script src="./glass-hover.js?v=20260518-wave-glow"></script>
-    <script src="./bgm-player.js?v=20260520-session-prompt-fix"></script>
-    <script src="./media-editor.js?v=20260519-writing-upgrade"></script>
+    <script src="./media-editor.js?v=20260611-editor-flow"></script>
     <script src="./backup.js"></script>
-    <script src="./compose.js?v=20260519-writing-upgrade"></script>
+    <script src="./compose.js?v=20260610-compose-ux"></script>
   </body>
 </html>
 

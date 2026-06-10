@@ -137,6 +137,8 @@ let selectedSlug = "";
 let mediaEditor = null;
 let legacyImages = [];
 let activeHighlightColor = highlightColorButtons.find((button) => button.classList.contains("is-active"))?.dataset.manageHighlightColor || "#ffd966";
+let ambientAnimationFrame = 0;
+let ambientAnimationTimer = 0;
 const emojiGroups = [
   { label: "常用", items: ["😊", "😂", "🤣", "😍", "🥰", "😎", "😭", "😅", "👍", "👏", "🙏", "💪"] },
   { label: "心情", items: ["✨", "🌙", "☕", "🍃", "🔥", "💡", "📌", "✅", "⚠️", "🎯", "📝", "📚"] },
@@ -998,6 +1000,9 @@ function slugFromHash() {
 }
 
 function animateAmbientBars(time) {
+  ambientAnimationFrame = 0;
+  if (document.visibilityState === "hidden") return;
+
   const t = time / 1000;
 
   if (ambient) {
@@ -1024,7 +1029,24 @@ function animateAmbientBars(time) {
     ambientBarB.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${rotate}deg) skewX(${skew}deg) scale(${scale})`;
   }
 
-  requestAnimationFrame(animateAmbientBars);
+  startAmbientAnimation(96);
+}
+
+function startAmbientAnimation(delay = 0) {
+  if (ambientAnimationFrame || ambientAnimationTimer || document.visibilityState === "hidden") return;
+
+  ambientAnimationTimer = window.setTimeout(() => {
+    ambientAnimationTimer = 0;
+    if (document.visibilityState === "hidden") return;
+    ambientAnimationFrame = requestAnimationFrame(animateAmbientBars);
+  }, delay);
+}
+
+function stopAmbientAnimation() {
+  if (ambientAnimationFrame) cancelAnimationFrame(ambientAnimationFrame);
+  if (ambientAnimationTimer) window.clearTimeout(ambientAnimationTimer);
+  ambientAnimationFrame = 0;
+  ambientAnimationTimer = 0;
 }
 
 async function init() {
@@ -1192,7 +1214,14 @@ window.addEventListener("hashchange", () => {
 });
 
 if (ambient || ambientBarA || ambientBarB) {
-  requestAnimationFrame(animateAmbientBars);
+  startAmbientAnimation();
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      stopAmbientAnimation();
+      return;
+    }
+    startAmbientAnimation();
+  });
 }
 
 init();

@@ -1,4 +1,5 @@
 (function () {
+  const playedKey = "glass-blog-opening-played";
   const openingState = {
     isPlaying: false,
     done: Promise.resolve(false),
@@ -21,7 +22,8 @@
   const navigation = performance.getEntriesByType?.("navigation")?.[0];
   const navigationType = navigation?.type || "";
   const cameFromSameSite = sameSiteReferrer();
-  const shouldPlayForNavigation = navigationType === "reload" || !cameFromSameSite;
+  const hasPlayedThisSession = sessionStorage.getItem(playedKey) === "1";
+  const shouldPlayForNavigation = !hasPlayedThisSession && navigationType !== "back_forward" && !cameFromSameSite;
 
   if (
     !isHomePage ||
@@ -31,6 +33,8 @@
   ) {
     return;
   }
+
+  sessionStorage.setItem(playedKey, "1");
 
   const overlay = document.createElement("section");
   overlay.className = "opening-screen";
@@ -48,7 +52,7 @@
       openingState.isPlaying = false;
       document.dispatchEvent(new CustomEvent("glassblog:opening-ended"));
       resolve(true);
-    }, 4300);
+    }, 1850);
   });
 
   document.body.append(overlay);
@@ -56,14 +60,14 @@
 
   window.setTimeout(() => {
     overlay.classList.add("is-dispersing");
-  }, 1700);
+  }, 760);
 
   window.setTimeout(() => {
     overlay.classList.add("is-leaving");
-  }, 3100);
+  }, 1320);
 
   window.setTimeout(() => {
     overlay.remove();
     document.body.classList.remove("opening-active");
-  }, 4300);
+  }, 1850);
 })();

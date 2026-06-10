@@ -306,6 +306,9 @@
   }
 
   function animateAmbientBars(time) {
+    ambientAnimationFrame = 0;
+    if (document.visibilityState === "hidden") return;
+
     const ambient = document.querySelector("[data-ambient]");
     const ambientBarA = document.querySelector('[data-ambient-bar="a"]');
     const ambientBarB = document.querySelector('[data-ambient-bar="b"]');
@@ -323,7 +326,27 @@
       ambientBarB.style.transform = `translate3d(${Math.cos(t * 0.62) * 62}px, ${Math.sin(t * 0.5) * 38}px, 0) rotate(${-13 + Math.cos(t * 0.4) * 2.2}deg) skewX(${10 + Math.sin(t * 0.44) * 1.1}deg)`;
     }
 
-    requestAnimationFrame(animateAmbientBars);
+    startAmbientAnimation(96);
+  }
+
+  let ambientAnimationFrame = 0;
+  let ambientAnimationTimer = 0;
+
+  function startAmbientAnimation(delay = 0) {
+    if (ambientAnimationFrame || ambientAnimationTimer || document.visibilityState === "hidden") return;
+
+    ambientAnimationTimer = window.setTimeout(() => {
+      ambientAnimationTimer = 0;
+      if (document.visibilityState === "hidden") return;
+      ambientAnimationFrame = requestAnimationFrame(animateAmbientBars);
+    }, delay);
+  }
+
+  function stopAmbientAnimation() {
+    if (ambientAnimationFrame) cancelAnimationFrame(ambientAnimationFrame);
+    if (ambientAnimationTimer) window.clearTimeout(ambientAnimationTimer);
+    ambientAnimationFrame = 0;
+    ambientAnimationTimer = 0;
   }
 
   window.GlassBlogAuth = {
@@ -343,7 +366,14 @@
     syncAuthorUi();
     initLoginPage();
     if (document.querySelector("[data-auth-page]")) {
-      requestAnimationFrame(animateAmbientBars);
+      startAmbientAnimation();
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") {
+          stopAmbientAnimation();
+          return;
+        }
+        startAmbientAnimation();
+      });
     }
   });
 })();

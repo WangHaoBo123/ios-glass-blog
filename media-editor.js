@@ -56,8 +56,13 @@
     let inCode = false;
 
     const flushText = () => {
-      if (!textLines.length) return;
-      blocks.push({ type: "text", text: textLines.join("\n") });
+      const text = textLines.join("\n").replace(/^\n+|\n+$/g, "");
+      if (!text.trim()) {
+        textLines = [];
+        return;
+      }
+
+      blocks.push({ type: "text", text });
       textLines = [];
     };
 
@@ -82,10 +87,6 @@
           return;
         }
 
-        if (!trimmed) {
-          flushText();
-          return;
-        }
       }
 
       textLines.push(line);
@@ -270,7 +271,7 @@
           if (this.blocks[index]?.type === "text") {
             this.blocks[index].text = textBlock.value;
             this.activeBlockIndex = index;
-            this.autoSize(textBlock, { allowShrink: false });
+            this.autoSize(textBlock);
             this.notifyChange();
           }
           return;
@@ -432,7 +433,7 @@
         textarea.style.height = "auto";
       }
 
-      const nextHeight = Math.max(84, textarea.scrollHeight);
+      const nextHeight = Math.max(48, textarea.scrollHeight);
       if (allowShrink || nextHeight > currentHeight + 1 || !textarea.style.height) {
         textarea.style.height = `${nextHeight}px`;
       }
